@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Amostras grátis — quiz e calculadora (site-que-vende)</title>
+<style>
+  :root{--amostra-destaque:#c2410c}
+  body{margin:0;font:17px/1.5 system-ui,sans-serif;background:#f3f1ee;color:#1f2a44;padding:40px 6vw}
+  h1{font-size:30px;margin:0 0 6px}.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px;margin-top:28px;align-items:start}
+  pre{background:#1f2a44;color:#e8ecf6;padding:16px;border-radius:12px;overflow:auto;font-size:13px}
+</style>
+</head>
+<body>
+<h1>Duas amostras grátis prontas para colar</h1>
+<p>Copie <code>amostra.js</code> para o seu site, cole a tag e troque o JSON pelos seus números. Os valores abaixo são de exemplo.</p>
+<div class="g">
+  <amostra-quiz>
+    <script type="application/json">
+    {
+      "titulo": "Qual serviço é o seu?",
+      "perguntas": [
+        {"texto": "O que mais incomoda hoje?", "opcoes": [
+          {"rotulo": "Pontas secas e sem forma", "pontos": {"corte": 2}},
+          {"rotulo": "Cor desbotada ou raiz aparecendo", "pontos": {"cor": 2}},
+          {"rotulo": "Fios quebradiços, sem brilho", "pontos": {"tratamento": 2}}]},
+        {"texto": "Quanto tempo você tem?", "opcoes": [
+          {"rotulo": "Menos de 1 hora", "pontos": {"corte": 1}},
+          {"rotulo": "Uma tarde", "pontos": {"cor": 1, "tratamento": 1}}]},
+        {"texto": "Quando foi a última vez no salão?", "opcoes": [
+          {"rotulo": "Há menos de 2 meses", "pontos": {"tratamento": 1}},
+          {"rotulo": "Há mais de 2 meses", "pontos": {"corte": 1, "cor": 1}}]}
+      ],
+      "resultados": {
+        "corte": {"titulo": "Corte com finalização", "texto": "45 minutos. Resolve forma e pontas.", "botao": {"texto": "Ver horários de corte", "href": "#"}},
+        "cor": {"titulo": "Coloração e retoque", "texto": "Cerca de 2 horas. Cor uniforme da raiz às pontas.", "botao": {"texto": "Ver horários de coloração", "href": "#"}},
+        "tratamento": {"titulo": "Hidratação profunda", "texto": "1 hora. Devolve brilho antes de qualquer química.", "botao": {"texto": "Ver horários de tratamento", "href": "#"}}
+      }
+    }
+    </script>
+  </amostra-quiz>
+
+  <amostra-calculadora>
+    <script type="application/json">
+    {
+      "titulo": "Quanto custa pintar a sua casa?",
+      "subtitulo": "Estimativa na hora, sem cadastro.",
+      "base": 350,
+      "campos": [
+        {"rotulo": "Área de parede", "tipo": "faixa", "min": 20, "max": 300, "passo": 10, "valor": 80, "unidade": "m²", "porUnidade": 28},
+        {"rotulo": "Acabamento", "tipo": "opcoes", "opcoes": [
+          {"rotulo": "Econômico", "vezes": 1}, {"rotulo": "Padrão", "vezes": 1.25}, {"rotulo": "Premium", "vezes": 1.6}]},
+        {"rotulo": "Teto também?", "tipo": "opcoes", "opcoes": [{"rotulo": "Não", "soma": 0}, {"rotulo": "Sim", "soma": 600}]}
+      ],
+      "margem": 12, "arredondar": 50,
+      "prefixo": "Sua pintura fica entre",
+      "sufixo": "com tinta e mão de obra",
+      "botao": {"texto": "Receber o orçamento exato", "href": "#"},
+      "nota": "Valores de exemplo: troque pelos seus."
+    }
+    </script>
+  </amostra-calculadora>
+</div>
+<script src="amostra.js"></script>
+</body>
+</html>
