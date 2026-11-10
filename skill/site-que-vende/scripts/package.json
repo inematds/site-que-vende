@@ -1,7 +1,7 @@
 {
   "name": "site-que-vende-scripts",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Auditor do site-que-vende (Playwright). Rode uma vez: npm install && npx playwright install chromium",
   "dependencies": { "playwright": "^1.47.0" }
 }
