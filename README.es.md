@@ -50,7 +50,16 @@ O que consertar (cole no seu agente): auditoria/consertar.md
 
 Los mensajes del auditor se generan en portugués.
 
-Código de salida: `0` pasó las cinco pruebas, `1` falló alguna, `2` error de uso. Sirve en CI.
+Código de salida: `0` pasó las cinco pruebas, `1` falló alguna, `2` error de uso o la página no abrió. Sirve en CI.
+
+Qué debes saber antes de ejecutar:
+
+- Cada auditoría tarda de 30 a 60 segundos y guarda de 4 a 8 MB en `auditoria/` (capturas e informe). Agrega `auditoria/` al `.gitignore` del sitio.
+- El auditor recorre la página e **interactúa con los controles** de la muestra (sliders, opciones, botones) para ver si responde. **No envía formularios ni sigue enlaces**.
+- **¿Cuál es el botón principal?** Elige el botón relleno más grande de la primera pantalla e indica en el informe cuál eligió. Si eligió el equivocado, marca el correcto en el HTML con el atributo `data-cta` (`<a data-cta href="...">`), o, en un sitio que no puedes editar, ejecuta el comando con `--cta "selector-css"`.
+- Página local que usa archivos fuera de su carpeta (`../`) y no está en un repositorio git: pasa `--raiz <carpeta que contiene todo>`. El auditor avisa cuando algún archivo devuelve 404.
+- Los patrones 1 y 4 se miden en la computadora (1440×900) y en el celular (390×844); los patrones 2, 3 y 5, en la computadora.
+- `node skill/site-que-vende/scripts/auditar.js --help` muestra todas las opciones.
 
 ## Qué incluye
 
@@ -62,9 +71,10 @@ Código de salida: `0` pasó las cinco pruebas, `1` falló alguna, `2` error de 
 | Modelo de las muestras | `skill/site-que-vende/amostras/exemplo.html` | quiz y calculadora en funcionamiento, para copiar |
 | Skill | `skill/site-que-vende/SKILL.md` | los 5 pasos para el agente: brief → medir → corregir → medir → revisión humana |
 | Brief | `skill/site-que-vende/referencias/brief.md` | las preguntas previas al diseño y el pedido listo para pegar |
+| Claves de las muestras | `skill/site-que-vende/referencias/amostras.md` | todas las claves del JSON del quiz y de la calculadora, las variables de color y el evento de resultado |
 | Los 5 patrones | `skill/site-que-vende/referencias/cinco-padroes.md` | la idea, las cifras de las pruebas y lo que se mide |
 | Ejemplos | `exemplos/ruim/` y `exemplos/bom/` | el mismo negocio ficticio: uno falla en los 5 patrones y el otro los supera |
-| Pruebas | `tests/rodar.sh` | 21 verificaciones: el malo falla por el motivo correcto, el bueno pasa y las muestras funcionan |
+| Pruebas | `tests/rodar.sh` | 30 verificaciones: el malo falla por el motivo correcto, el bueno pasa, las muestras funcionan y 4 casos que ya engañaron al auditor |
 
 ## El proceso, de principio a fin (7 pasos)
 
@@ -110,13 +120,15 @@ Sin ningún agente, el auditor y las muestras funcionan por sí solos.
 ```
 
 El color del botón viene de tu página: `:root { --amostra-destaque: #c2410c; }`. No se envía nada a ningún servidor.
+Todas las claves (incluidas `multiplica`, `margem`, `moeda`, `idioma`): [`amostras.md`](skill/site-que-vende/referencias/amostras.md).
 
 ## Límites (lee antes de confiar)
 
 - El auditor mide la forma, no la verdad: un título específico y falso pasa. Por eso existe la revisión humana del paso 7.
 - Si el botón principal es negro, blanco o gris, el patrón 2 se convierte en una advertencia, porque no se puede contar dónde más aparece el color.
 - Los sitios de marcas grandes suelen fallar en varios patrones y aun así vender: ya tienen la confianza que un negocio pequeño necesita ganarse en la primera pantalla.
-- Pasar las cinco pruebas no garantiza ventas. Garantiza que el sitio no pierde clientes por los cinco motivos más comunes.
+- Pasar las cinco pruebas no garantiza ventas. Elimina cinco motivos comunes por los que un sitio pierde clientes; el resto depende de la oferta, el precio y el tráfico.
+- "Sombra", "una pieza que cruza el borde" y "algo se mueve por pantalla" son decisiones de diseño de este kit. Un sitio plano bien resuelto puede vender; el auditor indica en qué se diferencia del patrón.
 - Los mensajes del auditor están en portugués. Las páginas auditadas pueden estar en portugués, inglés o español.
 
 ## Licencia

@@ -211,7 +211,8 @@
     <tr><td>Skill</td><td><code>skill/site-que-vende/SKILL.md</code></td><td>os 5 passos para o agente: brief, medir, consertar, medir de novo, revisão humana</td></tr>
     <tr><td>Brief</td><td><code>skill/site-que-vende/referencias/brief.md</code></td><td>as perguntas antes do design e o pedido pronto para colar</td></tr>
     <tr><td>Exemplos</td><td><code>exemplos/ruim/</code> e <code>exemplos/bom/</code></td><td>o mesmo negócio fictício: um falha nos 5, o outro passa nos 5</td></tr>
-    <tr><td>Testes</td><td><code>tests/rodar.sh</code></td><td>confere que o exemplo ruim falha com o motivo certo, que o bom passa e que as amostras funcionam</td></tr>
+    <tr><td>Chaves das amostras</td><td><code>skill/site-que-vende/referencias/amostras.md</code></td><td>todas as chaves do JSON do quiz e da calculadora, as variáveis de cor e o evento de resultado</td></tr>
+    <tr><td>Testes</td><td><code>tests/rodar.sh</code></td><td>30 verificações: o exemplo ruim falha com o motivo certo, o bom passa, as amostras funcionam e 4 casos que já enganaram o auditor continuam certos</td></tr>
   </table></div>
 </div></section>
 
@@ -368,6 +369,21 @@
       </ul>
     </div>
   </div>
+
+  <h3 id="numeros" style="margin:34px 0 8px;font-size:1.1rem">De onde vêm os números</h3>
+  <p class="mut" style="margin:0 0 12px;max-width:74ch">Procure pelo nome para ler o original. Nenhum deles é medição nossa.</p>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>Número</th><th>Origem</th></tr>
+    <tr><td>12,1% → 21,7% (79,3% melhor)</td><td>estudo de caso da agência de conversão CXL sobre a página de cadastro do site de vagas TruckersReport</td></tr>
+    <tr><td>+90% de cliques para a página de preços</td><td>teste A/B de posicionamento da CityCliq (título "Create a webpage for your business")</td></tr>
+    <tr><td>+31,4% de conversão repetindo a palavra buscada</td><td>teste de texto dinâmico em página de destino da Campaign Monitor</td></tr>
+    <tr><td>Parallax: mais divertido e com cara mais profissional, sem melhora geral da experiência de uso</td><td>dissertação "The effects of parallax scrolling on user experience and preference in web design", Universidade Purdue</td></tr>
+    <tr><td>Movimento puxa a atenção, para o bem e para o mal</td><td>artigos do Nielsen Norman Group sobre animação em interfaces</td></tr>
+    <tr><td>Cerca de um terço dos adultos acima de 40 com disfunção do ouvido interno</td><td>pesquisa nacional de saúde dos EUA analisada pela Johns Hopkins (publicada em 2009)</td></tr>
+    <tr><td>Efeito IKEA (a gente valoriza mais o que ajudou a montar)</td><td>Norton, Mochon e Ariely, "The IKEA effect: When labor leads to love" (2012)</td></tr>
+    <tr><td>Calculadora de ortodontia com perto de 45% de conversão</td><td>caso divulgado pela Outgrow, a empresa que vende a ferramenta (não é estudo independente)</td></tr>
+    <tr><td>Regra 60/30/10</td><td>regra prática de decoração de interiores, não é estudo</td></tr>
+  </table></div>
 </div></section>
 
 <section id="antes-depois"><div class="wrap">
@@ -418,6 +434,15 @@ cd skill/site-que-vende/scripts && npm install && npx playwright install chromiu
 <pre>node skill/site-que-vende/scripts/auditar.js https://seusite.com.br --saida auditoria</pre>
     <p>Com um arquivo no lugar do endereço:</p>
 <pre>node skill/site-que-vende/scripts/auditar.js minha-pagina/index.html --saida auditoria</pre>
+    <h4 id="antes-de-rodar" style="font-family:Sora;font-size:.95rem;margin:1.2em 0 .4em">O que saber antes de rodar</h4>
+    <ul class="mut" style="margin:0;padding-left:1.2em">
+      <li>Cada auditoria leva de 30 a 60 segundos e grava de 4 a 8 MB em <code>auditoria/</code> (fotos e relatório). Ponha <code>auditoria/</code> no <code>.gitignore</code> do site.</li>
+      <li>O auditor rola a página e mexe nos controles da amostra (sliders, opções, botões) para ver se ela responde. Ele não envia formulário e não segue link.</li>
+      <li>Qual é o botão principal? Ele escolhe o maior botão cheio da primeira tela e diz no relatório qual escolheu. Se escolheu errado, marque o certo no HTML com o atributo <code>data-cta</code> (<code>&lt;a data-cta href="..."&gt;</code>). Em site que você não pode editar, rode com <code>--cta "seletor-css"</code>.</li>
+      <li>Página local que usa arquivos fora da pasta dela (<code>../</code>) e não está num repositório git: passe <code>--raiz &lt;pasta que contém tudo&gt;</code>. O auditor avisa quando algum arquivo deu 404.</li>
+      <li>Os padrões 1 e 4 são medidos no computador (1440×900) e no celular (390×844). Os padrões 2, 3 e 5, só no computador.</li>
+      <li><code>node skill/site-que-vende/scripts/auditar.js --help</code> mostra todas as opções.</li>
+    </ul>
   </div></div>
 
   <div class="step"><div class="b">3</div><div>
@@ -426,7 +451,7 @@ cd skill/site-que-vende/scripts && npm install && npx playwright install chromiu
 <pre>site-que-vende · exemplos/ruim/index.html
 
 FALHA  1. Teste do espelho
-         - Título genérico: "Soluções inovadoras de agendamento com IA" serve para qualquer empresa (casou com /solu[çc][õo]es? (inovador|inteligent|completa|digita)/i).
+         - Título genérico: "Soluções inovadoras de agendamento com IA" serve para qualquer empresa (o trecho "Soluções inovador" não diz nada sobre o cliente).
          - O botão principal ("Enviar") não aparece na primeira tela do computador.
          - No celular, o botão principal não aparece na primeira tela.
          - O botão diz "Enviar": não conta o que acontece depois do clique.
@@ -437,7 +462,7 @@ FALHA  3. Frente, meio e fundo
          - Nenhuma peça atravessa a borda de uma seção: a página é uma pilha de caixas.
          - Nenhum elemento tem sombra: tudo está no mesmo plano.
 FALHA  4. Movimento com função
-         - O título não está legível 0,4 s depois de a página abrir (opacidade 0.38): o visitante espera a animação.
+         - O título não está legível 0,4 s depois de a página abrir, no computador e no celular (opacidade 0.39): o visitante espera a animação.
          - 4 coisas se movem ao mesmo tempo na tela 2 (div.cartao, div.cartao, div.cartao, div.cartao).
          - Com "reduzir movimento" ligado no aparelho, 4 elemento(s) continuam se movendo.
 FALHA  5. Amostra grátis
@@ -445,9 +470,9 @@ FALHA  5. Amostra grátis
 
 0 de 5 padrões passam.  Relatório: auditoria/relatorio.html
 O que consertar (cole no seu agente): auditoria/consertar.md</pre>
-    <p>O número da opacidade na linha do padrão 4 muda um pouco a cada rodada, porque depende do instante da medição. O trecho "casou com /.../" é a regra interna que reconheceu o título genérico: pode ignorar.</p>
+    <p>O número da opacidade na linha do padrão 4 muda um pouco a cada rodada, porque depende do instante da medição.</p>
     <p>Na pasta <code>auditoria/</code> ficam: <code>relatorio.html</code> (para abrir no navegador), <code>relatorio.json</code> (as medidas), <code>consertar.md</code> (a lista do que fazer) e as fotos <code>desktop-tela1.png</code>, <code>celular-tela1.png</code>, <code>desktop-pagina.png</code> e <code>desktop-marca-texto.png</code>.</p>
-    <p>Código de saída: <code>0</code> passou nos cinco, <code>1</code> algum falhou, <code>2</code> erro de uso. Serve em CI (a verificação automática que roda a cada mudança no código).</p>
+    <p>Código de saída: <code>0</code> passou nos cinco, <code>1</code> algum falhou, <code>2</code> erro de uso ou a página não abriu. Serve em CI (a verificação automática que roda a cada mudança no código).</p>
   </div></div>
 
   <div class="step"><div class="b">4</div><div>
@@ -479,12 +504,13 @@ O que consertar (cole no seu agente): auditoria/consertar.md</pre>
 <pre>mkdir -p ~/.claude/skills
 ln -s "$PWD/skill/site-que-vende" ~/.claude/skills/site-que-vende</pre>
       <p>O Claude Code lê <code>~/.claude/skills/site-que-vende/SKILL.md</code> quando uma sessão começa. Abra uma sessão nova e peça: "audita meu site com o site-que-vende" ou "por que meu site não converte?". Se ele não carregar sozinho, diga: "leia <code>~/.claude/skills/site-que-vende/SKILL.md</code> e siga os passos".</p>
+      <p style="margin-top:.7em">Dentro do <code>SKILL.md</code>, os caminhos (<code>scripts/</code>, <code>amostras/</code>, <code>referencias/</code>) são relativos à pasta da skill, que ele chama de <code>$KIT</code>. O agente trabalha na pasta do seu site: chama o auditor por <code>node $KIT/scripts/auditar.js</code> e copia <code>$KIT/amostras/amostra.js</code> para dentro do site.</p>
     </div>
     <div class="card">
       <h3>Em outro agente, ou sem agente</h3>
       <p>No Codex ou no Cursor, abra a pasta do kit e diga: "leia <code>skill/site-que-vende/SKILL.md</code> e siga os passos".</p>
       <p style="margin-top:.7em">Sem agente nenhum, o caminho manual é o dos seis passos acima: o auditor e as amostras funcionam sozinhos, e o <code>relatorio.html</code> diz o que fazer em cada falha.</p>
-      <p style="margin-top:.7em">Para conferir o kit: <code>bash tests/rodar.sh</code> tem de terminar em <code>TUDO OK</code>.</p>
+      <p style="margin-top:.7em">Para conferir o kit: <code>bash tests/rodar.sh</code> faz 30 verificações e tem de terminar em <code>TUDO OK</code>.</p>
     </div>
   </div>
 
@@ -513,7 +539,7 @@ ln -s "$PWD/skill/site-que-vende" ~/.claude/skills/site-que-vende</pre>
 &lt;script src="amostra.js"&gt;&lt;/script&gt;</pre>
       <p class="mut" style="font-size:.95rem">A cor do botão vem da sua página:</p>
 <pre>:root { --amostra-destaque: #c2410c; }</pre>
-      <p class="mut" style="font-size:.95rem">Também dá para ajustar <code>--amostra-fundo</code>, <code>--amostra-texto</code>, <code>--amostra-borda</code> e <code>--amostra-raio</code>. A amostra herda a fonte da página e não tem animação.</p>
+      <p class="mut" style="font-size:.95rem">Também dá para ajustar <code>--amostra-destaque-texto</code>, <code>--amostra-fundo</code>, <code>--amostra-texto</code>, <code>--amostra-borda</code> e <code>--amostra-raio</code>. A amostra herda a fonte da página e não tem animação.</p>
     </div>
     <div class="demo">
       <h3 style="font-size:1.05rem;margin-bottom:.6em">Funcionando aqui</h3>
@@ -544,9 +570,10 @@ ln -s "$PWD/skill/site-que-vende" ~/.claude/skills/site-que-vende</pre>
   <h3 style="margin:34px 0 12px;font-size:1.1rem">O que dá para configurar no JSON</h3>
   <div class="tblwrap"><table class="tbl">
     <tr><th>Tag</th><th>Chaves</th><th>Como funciona</th></tr>
-    <tr><td><code>&lt;amostra-calculadora&gt;</code></td><td><code>titulo</code>, <code>subtitulo</code>, <code>base</code>, <code>campos</code>, <code>margem</code>, <code>arredondar</code>, <code>prefixo</code>, <code>sufixo</code>, <code>botao</code>, <code>nota</code>, <code>moeda</code>, <code>idioma</code></td><td>resultado = (base + soma dos campos) × multiplicadores, mostrado como faixa (mais ou menos a margem). Campo <code>"tipo": "faixa"</code> usa <code>porUnidade</code>; com <code>"multiplica": true</code> entra como multiplicador. Campo <code>"tipo": "opcoes"</code> usa <code>soma</code> ou <code>vezes</code>.</td></tr>
-    <tr><td><code>&lt;amostra-quiz&gt;</code></td><td><code>titulo</code>, <code>perguntas</code>, <code>resultados</code>, <code>prefixo</code>, <code>refazer</code></td><td>cada opção soma <code>pontos</code> em um ou mais resultados; ganha o que tiver mais pontos. Cada resultado tem <code>titulo</code>, <code>texto</code> e <code>botao</code>.</td></tr>
+    <tr><td><code>&lt;amostra-calculadora&gt;</code></td><td><code>titulo</code>, <code>subtitulo</code>, <code>base</code>, <code>campos</code>, <code>margem</code>, <code>arredondar</code>, <code>prefixo</code>, <code>sufixo</code>, <code>botao</code>, <code>nota</code>, <code>moeda</code>, <code>idioma</code>, <code>ate</code></td><td>resultado = (base + soma dos campos) × multiplicadores, mostrado como faixa (mais ou menos a margem). Campo <code>"tipo": "faixa"</code> usa <code>porUnidade</code>; com <code>"multiplica": true</code> entra como multiplicador. Campo <code>"tipo": "opcoes"</code> usa <code>soma</code> ou <code>vezes</code>.</td></tr>
+    <tr><td><code>&lt;amostra-quiz&gt;</code></td><td><code>titulo</code>, <code>perguntas</code>, <code>resultados</code>, <code>prefixo</code>, <code>refazer</code>, <code>textoPergunta</code>, <code>idioma</code></td><td>cada opção soma <code>pontos</code> em um ou mais resultados; ganha o que tiver mais pontos. Cada resultado tem <code>titulo</code>, <code>texto</code> e <code>botao</code>.</td></tr>
   </table></div>
+  <p class="note">As chaves do JSON ficam em português (<code>titulo</code>, <code>campos</code>, <code>rotulo</code>); os valores são seus, em qualquer idioma. Os textos fixos (o contador do quiz, o separador entre os dois valores da faixa, "Estimativa", "Responder de novo") saem em português, inglês ou espanhol conforme o <code>idioma</code> do JSON ou o <code>lang</code> da página, e cada um pode ser trocado no JSON. As duas tags disparam o evento <code>amostra-resultado</code> quando o resultado muda: serve para medir uso sem coletar dado pessoal. JSON inválido ou incompleto aparece escrito no lugar da amostra (por exemplo, <code>amostra-quiz: falta a lista "perguntas"</code>). Todas as chaves, inclusive <code>multiplica</code>, <code>margem</code>, <code>moeda</code> e <code>idioma</code>, as variáveis CSS e o evento estão em <a href="https://github.com/inematds/site-que-vende/blob/main/skill/site-que-vende/referencias/amostras.md" target="_blank" rel="noopener"><code>referencias/amostras.md</code></a>.</p>
 </div></section>
 
 <section id="brief"><div class="wrap">
@@ -581,14 +608,14 @@ Para quem é: &lt;1&gt;
 O que a pessoa ganha: &lt;2&gt;
 Ação principal (um botão, marcado com data-cta): &lt;3&gt;
 Palavra que ela usa: &lt;4&gt;
-Amostra grátis (responde a "&lt;5&gt;"): use amostras/amostra.js com &lt;amostra-calculadora&gt; ou &lt;amostra-quiz&gt;; os números são estes: &lt;...&gt;
+Amostra grátis (responde a "&lt;5&gt;"): copie o arquivo amostra.js do kit site-que-vende (skill/site-que-vende/amostras/) para este site e use &lt;amostra-calculadora&gt; ou &lt;amostra-quiz&gt;; os números são estes: &lt;...&gt;
 Cores: fundo &lt;hex&gt;, estrutura &lt;hex&gt;, destaque &lt;hex&gt; (destaque só em botões e links).
 Primeira tela: título, uma linha de apoio e o botão, prontos sem animação, com uma foto real no fundo.
 Uma peça atravessa a borda da primeira seção. Sombra só no botão e no cartão principal.
 No máximo uma coisa se move por tela, e nada se move com prefers-reduced-motion: reduce.
 Não invente depoimento, número nem cliente.
-Depois rode: node scripts/auditar.js index.html  e conserte até dar 5 de 5.</pre>
-  <p class="src"><code>data-cta</code> é um atributo que você põe no HTML do botão principal (<code>&lt;a data-cta href="..."&gt;</code>) para dizer ao auditor qual é ele. Sem a marca, o auditor escolhe sozinho o botão de mais peso (tamanho e contraste) da primeira tela. Os caminhos do pedido (<code>scripts/auditar.js</code>, <code>amostras/amostra.js</code>) partem da pasta <code>skill/site-que-vende/</code> do kit.</p>
+Depois rode o auditor do kit: node &lt;pasta-do-kit&gt;/skill/site-que-vende/scripts/auditar.js index.html  e conserte até dar 5 de 5.</pre>
+  <p class="src"><code>data-cta</code> é um atributo que você põe no HTML do botão principal (<code>&lt;a data-cta href="..."&gt;</code>) para dizer ao auditor qual é ele. Sem a marca, o auditor escolhe o maior botão cheio da primeira tela e diz no relatório qual escolheu. <code>&lt;pasta-do-kit&gt;</code> é onde você clonou o site-que-vende.</p>
 </div></section>
 
 <section id="processo"><div class="wrap">
@@ -625,7 +652,8 @@ Depois rode: node scripts/auditar.js index.html  e conserte até dar 5 de 5.</pr
     <li><strong>Botão principal preto, branco ou cinza:</strong> o padrão 2 vira aviso, porque não dá para contar onde mais a cor aparece.</li>
     <li><strong>Animação feita em <code>&lt;canvas&gt;</code> ou WebGL</strong> conta como uma coisa só.</li>
     <li><strong>Site de marca grande</strong> costuma falhar em vários padrões e vender assim mesmo: ele já tem a confiança que o site de um negócio pequeno precisa conquistar na primeira tela.</li>
-    <li><strong>Passar nos cinco não garante venda.</strong> Garante que o site não perde cliente pelos cinco motivos mais comuns.</li>
+    <li><strong>Passar nos cinco não garante venda.</strong> Tira do caminho cinco motivos comuns de um site perder cliente. O resto é oferta, preço e tráfego.</li>
+    <li><strong>Sombra, peça atravessando a borda e uma coisa se movendo por tela</strong> são escolhas de design deste kit. Um site chapado bem resolvido pode vender. O auditor avisa onde ele difere do padrão.</li>
     <li><strong>Site que não vende nada</strong> (portfólio de arte, convite, página de evento visual): os padrões 1 e 5 não se aplicam. Rode o auditor só para ver as medidas.</li>
     <li><strong>As mensagens do auditor estão em português.</strong> As páginas auditadas podem estar em português, inglês ou espanhol.</li>
   </ul>

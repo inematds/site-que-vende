@@ -211,7 +211,8 @@
     <tr><td>Skill</td><td><code>skill/site-que-vende/SKILL.md</code></td><td>the 5 steps for the agent: brief, measure, fix, measure again, human review</td></tr>
     <tr><td>Brief</td><td><code>skill/site-que-vende/referencias/brief.md</code></td><td>the questions to ask before design and the ready-to-paste request</td></tr>
     <tr><td>Examples</td><td><code>exemplos/ruim/</code> and <code>exemplos/bom/</code></td><td>the same fictional business: one fails all 5, the other passes all 5</td></tr>
-    <tr><td>Tests</td><td><code>tests/rodar.sh</code></td><td>checks that the bad example fails for the right reason, the good example passes, and the samples work</td></tr>
+    <tr><td>Sample keys</td><td><code>skill/site-que-vende/referencias/amostras.md</code></td><td>all quiz and calculator JSON keys, color variables, and the result event</td></tr>
+    <tr><td>Tests</td><td><code>tests/rodar.sh</code></td><td>30 checks: the bad example fails for the right reason, the good one passes, the samples work, and 4 cases that have fooled the auditor before still come out right</td></tr>
   </table></div>
 </div></section>
 
@@ -368,6 +369,21 @@
       </ul>
     </div>
   </div>
+
+  <h3 id="numeros" style="margin:34px 0 8px;font-size:1.1rem">Where the numbers come from</h3>
+  <p class="mut" style="margin:0 0 12px;max-width:74ch">Search by name to read the original. None of these are our measurements.</p>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>Number</th><th>Source</th></tr>
+    <tr><td>12.1% → 21.7% (79.3% better)</td><td>case study by the conversion agency CXL on the signup page of the job site TruckersReport</td></tr>
+    <tr><td>+90% more clicks to the pricing page</td><td>CityCliq positioning A/B test (headline "Create a webpage for your business")</td></tr>
+    <tr><td>+31.4% conversion by repeating the searched word</td><td>Campaign Monitor dynamic text test on a landing page</td></tr>
+    <tr><td>Parallax: more fun and more professional-looking, with no overall improvement in user experience</td><td>thesis "The effects of parallax scrolling on user experience and preference in web design", Purdue University</td></tr>
+    <tr><td>Motion draws attention, for better and for worse</td><td>Nielsen Norman Group articles on animation in interfaces</td></tr>
+    <tr><td>About one third of adults over 40 with inner ear dysfunction</td><td>US national health survey analyzed by Johns Hopkins (published in 2009)</td></tr>
+    <tr><td>IKEA effect (we value more what we helped build)</td><td>Norton, Mochon and Ariely, "The IKEA effect: When labor leads to love" (2012)</td></tr>
+    <tr><td>Orthodontics calculator with close to 45% conversion</td><td>case shared by Outgrow, the company that sells the tool (not an independent study)</td></tr>
+    <tr><td>60/30/10 rule</td><td>rule of thumb from interior decoration, not a study</td></tr>
+  </table></div>
 </div></section>
 
 <section id="antes-depois"><div class="wrap">
@@ -418,6 +434,15 @@ cd skill/site-que-vende/scripts && npm install && npx playwright install chromiu
 <pre>node skill/site-que-vende/scripts/auditar.js https://seusite.com.br --saida auditoria</pre>
     <p>With a file instead of an address:</p>
 <pre>node skill/site-que-vende/scripts/auditar.js minha-pagina/index.html --saida auditoria</pre>
+    <h4 id="antes-de-rodar" style="font-family:Sora;font-size:.95rem;margin:1.2em 0 .4em">What to know before running</h4>
+    <ul class="mut" style="margin:0;padding-left:1.2em">
+      <li>Each audit takes 30 to 60 seconds and writes 4 to 8 MB to <code>auditoria/</code> (screenshots and report). Add <code>auditoria/</code> to the site's <code>.gitignore</code>.</li>
+      <li>The auditor scrolls the page and interacts with the sample's controls (sliders, options, buttons) to see if it responds. It does not submit forms or follow links.</li>
+      <li>Which is the main button? It picks the largest filled button on the first screen and says in the report which one it picked. If it picked the wrong one, mark the right one in the HTML with the <code>data-cta</code> attribute (<code>&lt;a data-cta href="..."&gt;</code>). On a site you cannot edit, run with <code>--cta "css-selector"</code>.</li>
+      <li>A local page that uses files outside its folder (<code>../</code>) and is not in a git repository: pass <code>--raiz &lt;folder that contains everything&gt;</code>. The auditor warns when a file returns 404.</li>
+      <li>Patterns 1 and 4 are measured on desktop (1440×900) and phone (390×844). Patterns 2, 3, and 5 on desktop only.</li>
+      <li><code>node skill/site-que-vende/scripts/auditar.js --help</code> shows all options.</li>
+    </ul>
   </div></div>
 
   <div class="step"><div class="b">3</div><div>
@@ -426,7 +451,7 @@ cd skill/site-que-vende/scripts && npm install && npx playwright install chromiu
 <pre>site-que-vende · exemplos/ruim/index.html
 
 FALHA  1. Teste do espelho
-         - Título genérico: "Soluções inovadoras de agendamento com IA" serve para qualquer empresa (casou com /solu[çc][õo]es? (inovador|inteligent|completa|digita)/i).
+         - Título genérico: "Soluções inovadoras de agendamento com IA" serve para qualquer empresa (o trecho "Soluções inovador" não diz nada sobre o cliente).
          - O botão principal ("Enviar") não aparece na primeira tela do computador.
          - No celular, o botão principal não aparece na primeira tela.
          - O botão diz "Enviar": não conta o que acontece depois do clique.
@@ -437,7 +462,7 @@ FALHA  3. Frente, meio e fundo
          - Nenhuma peça atravessa a borda de uma seção: a página é uma pilha de caixas.
          - Nenhum elemento tem sombra: tudo está no mesmo plano.
 FALHA  4. Movimento com função
-         - O título não está legível 0,4 s depois de a página abrir (opacidade 0.38): o visitante espera a animação.
+         - O título não está legível 0,4 s depois de a página abrir, no computador e no celular (opacidade 0.39): o visitante espera a animação.
          - 4 coisas se movem ao mesmo tempo na tela 2 (div.cartao, div.cartao, div.cartao, div.cartao).
          - Com "reduzir movimento" ligado no aparelho, 4 elemento(s) continuam se movendo.
 FALHA  5. Amostra grátis
@@ -449,7 +474,7 @@ O que consertar (cole no seu agente): auditoria/consertar.md</pre>
 <pre class="tr">site-que-vende · exemplos/ruim/index.html
 
 FAIL  1. Mirror test
-         - Generic title: "Soluções inovadoras de agendamento com IA" could apply to any company (matched /solu[çc][õo]es? (inovador|inteligent|completa|digita)/i).
+         - Generic title: "Soluções inovadoras de agendamento com IA" could apply to any company (the snippet "Soluções inovador" says nothing about the customer).
          - The main button ("Enviar") does not appear on the desktop's first screen.
          - On the phone, the main button does not appear on the first screen.
          - The button says "Enviar": it doesn't tell you what happens after you click it.
@@ -460,7 +485,7 @@ FAIL  3. Front, middle and back
          - No element crosses a section boundary: the page is a stack of boxes.
          - No element has a shadow: everything is on the same plane.
 FAIL  4. Motion with a purpose
-         - The title isn't readable 0.4 s after the page opens (opacity 0.38): the visitor has to wait for the animation.
+         - The title isn't readable 0.4 s after the page opens, on desktop and phone (opacity 0.39): the visitor has to wait for the animation.
          - 4 things move at the same time on screen 2 (div.cartao, div.cartao, div.cartao, div.cartao).
          - With “reduce motion” enabled on the device, 4 element(s) keep moving.
 FAIL  5. Free sample
@@ -468,9 +493,9 @@ FAIL  5. Free sample
 
 0 of 5 patterns pass.  Report: auditoria/relatorio.html
 What to fix (paste into your agent): auditoria/consertar.md</pre>
-    <p>The opacity number on the pattern 4 line changes slightly with each run because it depends on the time of the measurement. The snippet "matched /.../" is the internal rule that recognized the generic title: you can ignore it.</p>
+    <p>The opacity number on the pattern 4 line changes slightly with each run because it depends on when the measurement is taken.</p>
     <p>The <code>auditoria/</code> folder contains: <code>relatorio.html</code> (to open in a browser), <code>relatorio.json</code> (the measurements), <code>consertar.md</code> (the to-do list), and the screenshots <code>desktop-tela1.png</code>, <code>celular-tela1.png</code>, <code>desktop-pagina.png</code>, and <code>desktop-marca-texto.png</code>.</p>
-    <p>Exit code: <code>0</code> means all five passed, <code>1</code> means at least one failed, and <code>2</code> means a usage error. This works in CI (the automated check that runs whenever the code changes).</p>
+    <p>Exit code: <code>0</code> means all five passed, <code>1</code> means at least one failed, and <code>2</code> means a usage error or the page did not open. This works in CI (the automated check that runs whenever the code changes).</p>
   </div></div>
 
   <div class="step"><div class="b">4</div><div>
@@ -502,12 +527,13 @@ What to fix (paste into your agent): auditoria/consertar.md</pre>
 <pre>mkdir -p ~/.claude/skills
 ln -s "$PWD/skill/site-que-vende" ~/.claude/skills/site-que-vende</pre>
       <p>Claude Code reads <code>~/.claude/skills/site-que-vende/SKILL.md</code> when a session starts. Open a new session and ask: "audit my site with site-que-vende" or "why isn’t my site converting?". If it doesn’t load automatically, say: "read <code>~/.claude/skills/site-que-vende/SKILL.md</code> and follow the steps".</p>
+      <p style="margin-top:.7em">Inside <code>SKILL.md</code>, the paths (<code>scripts/</code>, <code>amostras/</code>, <code>referencias/</code>) are relative to the skill folder, which it calls <code>$KIT</code>. The agent works in your site's folder: it calls the auditor with <code>node $KIT/scripts/auditar.js</code> and copies <code>$KIT/amostras/amostra.js</code> into the site.</p>
     </div>
     <div class="card">
       <h3>In another agent, or without an agent</h3>
       <p>In Codex or Cursor, open the kit folder and say: "read <code>skill/site-que-vende/SKILL.md</code> and follow the steps".</p>
       <p style="margin-top:.7em">Without an agent, follow the six steps above. The auditor and samples work on their own, and <code>relatorio.html</code> tells you what to do for each failure.</p>
-      <p style="margin-top:.7em">To check the kit: <code>bash tests/rodar.sh</code> must finish with <code>TUDO OK</code>.</p>
+      <p style="margin-top:.7em">To check the kit: <code>bash tests/rodar.sh</code> runs 30 checks and must finish with <code>TUDO OK</code>.</p>
     </div>
   </div>
 
@@ -536,7 +562,7 @@ ln -s "$PWD/skill/site-que-vende" ~/.claude/skills/site-que-vende</pre>
 &lt;script src="amostra.js"&gt;&lt;/script&gt;</pre>
       <p class="mut" style="font-size:.95rem">The button’s color comes from your page:</p>
 <pre>:root { --amostra-destaque: #c2410c; }</pre>
-      <p class="mut" style="font-size:.95rem">You can also adjust <code>--amostra-fundo</code>, <code>--amostra-texto</code>, <code>--amostra-borda</code>, and <code>--amostra-raio</code>. The sample inherits the page’s font and has no animation.</p>
+      <p class="mut" style="font-size:.95rem">You can also adjust <code>--amostra-destaque-texto</code>, <code>--amostra-fundo</code>, <code>--amostra-texto</code>, <code>--amostra-borda</code>, and <code>--amostra-raio</code>. The sample inherits the page’s font and has no animation.</p>
     </div>
     <div class="demo">
       <h3 style="font-size:1.05rem;margin-bottom:.6em">See it in action</h3>
@@ -590,9 +616,9 @@ ln -s "$PWD/skill/site-que-vende" ~/.claude/skills/site-que-vende</pre>
               ]
             }
           ],
-          "margem": 0,
+          "margem": 12,
           "arredondar": 50,
-          "prefixo": "Your paint job is estimated at",
+          "prefixo": "Your paint job will cost",
           "sufixo": "including paint and labor",
           "botao": {
             "texto": "Get an exact quote",
@@ -611,10 +637,10 @@ ln -s "$PWD/skill/site-que-vende" ~/.claude/skills/site-que-vende</pre>
   <h3 style="margin:34px 0 12px;font-size:1.1rem">What you can configure in the JSON</h3>
   <div class="tblwrap"><table class="tbl">
     <tr><th>Tag</th><th>Keys</th><th>How it works</th></tr>
-    <tr><td><code>&lt;amostra-calculadora&gt;</code></td><td><code>titulo</code>, <code>subtitulo</code>, <code>base</code>, <code>campos</code>, <code>margem</code>, <code>arredondar</code>, <code>prefixo</code>, <code>sufixo</code>, <code>botao</code>, <code>nota</code>, <code>moeda</code>, <code>idioma</code></td><td>result = (base + sum of fields) × multipliers, shown as a range (plus or minus the margin). A <code>"tipo": "faixa"</code> field uses <code>porUnidade</code>; with <code>"multiplica": true</code>, it acts as a multiplier. A <code>"tipo": "opcoes"</code> field uses <code>soma</code> or <code>vezes</code>.</td></tr>
-    <tr><td><code>&lt;amostra-quiz&gt;</code></td><td><code>titulo</code>, <code>perguntas</code>, <code>resultados</code>, <code>prefixo</code>, <code>refazer</code></td><td>each option adds <code>pontos</code> to one or more results; the result with the most points wins. Each result has <code>titulo</code>, <code>texto</code>, and <code>botao</code>.</td></tr>
+    <tr><td><code>&lt;amostra-calculadora&gt;</code></td><td><code>titulo</code>, <code>subtitulo</code>, <code>base</code>, <code>campos</code>, <code>margem</code>, <code>arredondar</code>, <code>prefixo</code>, <code>sufixo</code>, <code>botao</code>, <code>nota</code>, <code>moeda</code>, <code>idioma</code>, <code>ate</code></td><td>result = (base + sum of fields) × multipliers, shown as a range (plus or minus the margin). A <code>"tipo": "faixa"</code> field uses <code>porUnidade</code>; with <code>"multiplica": true</code>, it acts as a multiplier. A <code>"tipo": "opcoes"</code> field uses <code>soma</code> or <code>vezes</code>.</td></tr>
+    <tr><td><code>&lt;amostra-quiz&gt;</code></td><td><code>titulo</code>, <code>perguntas</code>, <code>resultados</code>, <code>prefixo</code>, <code>refazer</code>, <code>textoPergunta</code>, <code>idioma</code></td><td>each option adds <code>pontos</code> to one or more results; the result with the most points wins. Each result has <code>titulo</code>, <code>texto</code>, and <code>botao</code>.</td></tr>
   </table></div>
-  <p class="note">JSON keys stay in Portuguese (<code>titulo</code>, <code>campos</code>, <code>rotulo</code>); the values are yours and can be in any language. The quiz counter ("Pergunta 1 de 3") and the separator between the calculator’s two range values (" a ") are written in Portuguese in <code>amostra.js</code>. That’s why the demo above uses <code>"margem": 0</code> and shows a single value. Labels, button text, currency (<code>moeda</code>), and number format (<code>idioma</code>) come from your JSON.</p>
+  <p class="note">The JSON keys stay in Portuguese (<code>titulo</code>, <code>campos</code>, <code>rotulo</code>); the values are yours, in any language. Fixed text (the quiz counter, the separator between the two range values, "Estimate", "Start over") appears in Portuguese, English, or Spanish depending on the JSON <code>idioma</code> or the page's <code>lang</code>, and each can be changed in the JSON. Both tags fire the <code>amostra-resultado</code> event when the result changes, so you can measure usage without collecting personal data. Invalid or incomplete JSON appears as text in place of the sample (for example, <code>amostra-quiz: falta a lista "perguntas"</code>). All keys, including <code>multiplica</code>, <code>margem</code>, <code>moeda</code>, and <code>idioma</code>, the CSS variables, and the event are documented in <a href="https://github.com/inematds/site-que-vende/blob/main/skill/site-que-vende/referencias/amostras.md" target="_blank" rel="noopener"><code>referencias/amostras.md</code></a> (in Portuguese).</p>
 </div></section>
 
 <section id="brief"><div class="wrap">
@@ -649,14 +675,14 @@ Who it is for: &lt;1&gt;
 What the person gains: &lt;2&gt;
 Main action (one button, marked with data-cta): &lt;3&gt;
 Word they use: &lt;4&gt;
-Free sample (answers "&lt;5&gt;"): use amostras/amostra.js with &lt;amostra-calculadora&gt; or &lt;amostra-quiz&gt;; these are the numbers: &lt;...&gt;
+Free sample (answers "&lt;5&gt;"): copy the amostra.js file from the site-que-vende kit (skill/site-que-vende/amostras/) to this site and use &lt;amostra-calculadora&gt; or &lt;amostra-quiz&gt;; these are the numbers: &lt;...&gt;
 Colors: background &lt;hex&gt;, structure &lt;hex&gt;, accent &lt;hex&gt; (accent only on buttons and links).
 First screen: headline, one supporting line, and the button, ready without animation, with a real photo in the background.
 One element crosses the edge of the first section. Shadow only on the button and the main card.
 At most one thing moves per screen, and nothing moves with prefers-reduced-motion: reduce.
 Do not invent a testimonial, number, or customer.
-Then run: node scripts/auditar.js index.html  and fix until you get 5 de 5.</pre>
-  <p class="src"><code>data-cta</code> is an attribute you add to the main button's HTML (<code>&lt;a data-cta href="..."&gt;</code>) to tell the auditor which one it is. Without the marker, the auditor chooses the most prominent button (size and contrast) on the first screen. The paths in the request (<code>scripts/auditar.js</code>, <code>amostras/amostra.js</code>) are relative to the kit's <code>skill/site-que-vende/</code> folder.</p>
+Then run the kit's auditor: node &lt;kit-folder&gt;/skill/site-que-vende/scripts/auditar.js index.html  and fix until you get 5 de 5.</pre>
+  <p class="src"><code>data-cta</code> is an attribute you add to the main button's HTML (<code>&lt;a data-cta href="..."&gt;</code>) to tell the auditor which one it is. Without the marker, the auditor picks the largest filled button on the first screen and says in the report which one it picked. <code>&lt;kit-folder&gt;</code> is where you cloned site-que-vende.</p>
 </div></section>
 
 <section id="processo"><div class="wrap">
@@ -693,7 +719,8 @@ Then run: node scripts/auditar.js index.html  and fix until you get 5 de 5.</pre
     <li><strong>Black, white, or gray primary button:</strong> pattern 2 becomes a warning because it cannot count where else the color appears.</li>
     <li><strong>Animation made with <code>&lt;canvas&gt;</code> or WebGL</strong> counts as a single thing.</li>
     <li><strong>Big brand websites</strong> often fail several patterns and still sell: they already have the trust that a small business website needs to earn on the first screen.</li>
-    <li><strong>Passing all five does not guarantee sales.</strong> It guarantees the site does not lose customers for the five most common reasons.</li>
+    <li><strong>Passing all five does not guarantee sales.</strong> It removes five common reasons a site loses customers. The rest comes down to the offer, price, and traffic.</li>
+    <li><strong>Shadow, an element crossing the edge, and one thing moving per screen</strong> are design choices in this kit. A well executed flat site can sell. The auditor points out where it differs from the pattern.</li>
     <li><strong>A site that sells nothing</strong> (art portfolio, invitation, visual event page): patterns 1 and 5 do not apply. Run the auditor just to see the measurements.</li>
     <li><strong>The auditor’s messages are in Portuguese.</strong> Audited pages can be in Portuguese, English, or Spanish.</li>
   </ul>

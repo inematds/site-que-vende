@@ -50,7 +50,16 @@ O que consertar (cole no seu agente): auditoria/consertar.md
 
 The auditor's messages are in Portuguese.
 
-Exit code: `0` passed all five, `1` one or more failed, `2` usage error. Works in CI.
+Exit code: `0` passed all five, `1` one or more failed, `2` usage error or the page did not open. Works in CI.
+
+What to know before running:
+
+- Each audit takes 30 to 60 seconds and writes 4 to 8 MB to `auditoria/` (screenshots and report). Add `auditoria/` to the site's `.gitignore`.
+- The auditor scrolls the page and **interacts with the sample's controls** (sliders, options, buttons) to see if it responds. It **does not submit forms or follow links**.
+- **Which is the main button?** It picks the largest filled button on the first screen and says which one it picked in the report. If it picked the wrong one, mark the right one in the HTML with the `data-cta` attribute (`<a data-cta href="...">`), or, on a site you cannot edit, run with `--cta "css-selector"`.
+- A local page that uses files outside its folder (`../`) and is not in a git repository: pass `--raiz <folder that contains everything>`. The auditor warns when a file returns 404.
+- Patterns 1 and 4 are measured on desktop (1440×900) and phone (390×844); patterns 2, 3, and 5 on desktop.
+- `node skill/site-que-vende/scripts/auditar.js --help` shows all options.
 
 ## What’s included
 
@@ -62,9 +71,10 @@ Exit code: `0` passed all five, `1` one or more failed, `2` usage error. Works i
 | Sample template | `skill/site-que-vende/amostras/exemplo.html` | working quiz and calculator to copy |
 | Skill | `skill/site-que-vende/SKILL.md` | the 5 steps for the agent: brief → measure → fix → measure → human review |
 | Brief | `skill/site-que-vende/referencias/brief.md` | questions to answer before design and a ready-to-paste prompt |
+| Sample keys | `skill/site-que-vende/referencias/amostras.md` | all quiz and calculator JSON keys, color variables, and the result event |
 | The 5 patterns | `skill/site-que-vende/referencias/cinco-padroes.md` | the idea, test numbers, and what is measured |
 | Examples | `exemplos/ruim/` and `exemplos/bom/` | the same fictional business: one fails all 5, the other passes all 5 |
-| Tests | `tests/rodar.sh` | 21 checks: the bad example fails for the right reason, the good one passes, and the samples work |
+| Tests | `tests/rodar.sh` | 30 checks: the bad example fails for the right reason, the good one passes, the samples work, and 4 cases that have fooled the auditor before |
 
 ## The process, from start to finish (7 steps)
 
@@ -110,13 +120,15 @@ The auditor and samples also work on their own, without an agent.
 ```
 
 The button color comes from your page: `:root { --amostra-destaque: #c2410c; }`. Nothing is sent to any server.
+All keys (including `multiplica`, `margem`, `moeda`, `idioma`): [`amostras.md`](skill/site-que-vende/referencias/amostras.md).
 
 ## Limits (read before relying on it)
 
 - The auditor measures form, not truth: a specific but false headline passes. That is why step 7 includes human review.
 - If the main button is black, white, or gray, pattern 2 becomes a warning because the auditor cannot count where else that color appears.
 - Big brand websites often fail several patterns and still sell: they already have the trust that a small business must earn on the first screen.
-- Passing all five does not guarantee a sale. It means the site does not lose customers for the five most common reasons.
+- Passing all five does not guarantee a sale. It removes five common reasons a site loses customers; the rest comes down to the offer, price, and traffic.
+- "Shadow," "an element crossing the edge," and "one thing moves per screen" are design choices in this kit. A well executed flat site can sell; the auditor points out where it differs from the pattern.
 - The auditor’s messages are in Portuguese. The audited pages can be in Portuguese, English, or Spanish.
 
 ## License
