@@ -54,7 +54,8 @@ Exit code: `0` passed all five, `1` one or more failed, `2` usage error or the p
 
 What to know before running:
 
-- Each audit takes 30 to 60 seconds and writes 4 to 8 MB to `auditoria/` (screenshots and report). Add `auditoria/` to the site's `.gitignore`.
+- Each audit takes 20 to 60 seconds and writes 1 to 12 MB to `auditoria/` (screenshots and report). Add `auditoria/` to the site's `.gitignore`.
+- While testing the sample, the auditor blocks every page submission (form, `fetch`, any request that isn't GET) and every attempt to reach another address. Nothing is sent to the site, and the report lists what was blocked.
 - The auditor scrolls the page and **interacts with the sample's controls** (sliders, options, buttons) to see if it responds. It **does not submit forms or follow links**.
 - **Which is the main button?** It picks the largest filled button on the first screen and says which one it picked in the report. If it picked the wrong one, mark the right one in the HTML with the `data-cta` attribute (`<a data-cta href="...">`), or, on a site you cannot edit, run with `--cta "css-selector"`.
 - A local page that uses files outside its folder (`../`) and is not in a git repository: pass `--raiz <folder that contains everything>`. The auditor warns when a file returns 404.
@@ -74,7 +75,7 @@ What to know before running:
 | Sample keys | `skill/site-que-vende/referencias/amostras.md` | all quiz and calculator JSON keys, color variables, and the result event |
 | The 5 patterns | `skill/site-que-vende/referencias/cinco-padroes.md` | the idea, test numbers, and what is measured |
 | Examples | `exemplos/ruim/` and `exemplos/bom/` | the same fictional business: one fails all 5, the other passes all 5 |
-| Tests | `tests/rodar.sh` | 30 checks: the bad example fails for the right reason, the good one passes, the samples work, and 4 cases that have fooled the auditor before |
+| Tests | `tests/rodar.sh` | 38 checks: the bad example fails for the right reason, the good one passes, the samples work, and 7 cases that have fooled the auditor before |
 
 ## The process, from start to finish (7 steps)
 
@@ -130,6 +131,8 @@ All keys (including `multiplica`, `margem`, `moeda`, `idioma`): [`amostras.md`](
 - Passing all five does not guarantee a sale. It removes five common reasons a site loses customers; the rest comes down to the offer, price, and traffic.
 - "Shadow," "an element crossing the edge," and "one thing moves per screen" are design choices in this kit. A well executed flat site can sell; the auditor points out where it differs from the pattern.
 - The auditor’s messages are in Portuguese. The audited pages can be in Portuguese, English, or Spanish.
+- The auditor's limits (15% accent color, 2 uses outside clicks, 6 shadows, 7 questions, 4 moving elements) are choices made for this kit, not research-based figures.
+- A local file is served at 127.0.0.1 from the root of the Git repository only while the measurement is running.
 
 ## License
 

@@ -54,7 +54,8 @@ Código de salida: `0` pasó las cinco pruebas, `1` falló alguna, `2` error de 
 
 Qué debes saber antes de ejecutar:
 
-- Cada auditoría tarda de 30 a 60 segundos y guarda de 4 a 8 MB en `auditoria/` (capturas e informe). Agrega `auditoria/` al `.gitignore` del sitio.
+- Cada auditoría tarda de 20 a 60 segundos y guarda de 1 a 12 MB en `auditoria/` (capturas e informe). Agrega `auditoria/` al `.gitignore` del sitio.
+- Mientras prueba la muestra, el auditor bloquea todos los envíos de la página (formularios, `fetch`, cualquier solicitud que no sea GET) y cualquier intento de conectarse a otra dirección. No se envía nada al sitio y el informe enumera lo que se bloqueó.
 - El auditor recorre la página e **interactúa con los controles** de la muestra (sliders, opciones, botones) para ver si responde. **No envía formularios ni sigue enlaces**.
 - **¿Cuál es el botón principal?** Elige el botón relleno más grande de la primera pantalla e indica en el informe cuál eligió. Si eligió el equivocado, marca el correcto en el HTML con el atributo `data-cta` (`<a data-cta href="...">`), o, en un sitio que no puedes editar, ejecuta el comando con `--cta "selector-css"`.
 - Página local que usa archivos fuera de su carpeta (`../`) y no está en un repositorio git: pasa `--raiz <carpeta que contiene todo>`. El auditor avisa cuando algún archivo devuelve 404.
@@ -74,7 +75,7 @@ Qué debes saber antes de ejecutar:
 | Claves de las muestras | `skill/site-que-vende/referencias/amostras.md` | todas las claves del JSON del quiz y de la calculadora, las variables de color y el evento de resultado |
 | Los 5 patrones | `skill/site-que-vende/referencias/cinco-padroes.md` | la idea, las cifras de las pruebas y lo que se mide |
 | Ejemplos | `exemplos/ruim/` y `exemplos/bom/` | el mismo negocio ficticio: uno falla en los 5 patrones y el otro los supera |
-| Pruebas | `tests/rodar.sh` | 30 verificaciones: el malo falla por el motivo correcto, el bueno pasa, las muestras funcionan y 4 casos que ya engañaron al auditor |
+| Pruebas | `tests/rodar.sh` | 38 verificaciones: el malo falla por el motivo correcto, el bueno pasa, las muestras funcionan y 7 casos que ya engañaron al auditor |
 
 ## El proceso, de principio a fin (7 pasos)
 
@@ -130,6 +131,8 @@ Todas las claves (incluidas `multiplica`, `margem`, `moeda`, `idioma`): [`amostr
 - Pasar las cinco pruebas no garantiza ventas. Elimina cinco motivos comunes por los que un sitio pierde clientes; el resto depende de la oferta, el precio y el tráfico.
 - "Sombra", "una pieza que cruza el borde" y "algo se mueve por pantalla" son decisiones de diseño de este kit. Un sitio plano bien resuelto puede vender; el auditor indica en qué se diferencia del patrón.
 - Los mensajes del auditor están en portugués. Las páginas auditadas pueden estar en portugués, inglés o español.
+- Los límites del auditor (15% de color de acento, 2 usos fuera de los clics, 6 sombras, 7 preguntas, 4 elementos en movimiento) son decisiones de este kit, no cifras basadas en estudios.
+- Un archivo local se sirve en 127.0.0.1 desde la raíz del repositorio Git, solo mientras se ejecuta la medición.
 
 ## Licencia
 

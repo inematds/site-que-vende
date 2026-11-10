@@ -56,7 +56,8 @@ Código de saída: `0` passou nos cinco, `1` algum falhou, `2` erro de uso ou a 
 
 O que saber antes de rodar:
 
-- Cada auditoria leva de 30 a 60 segundos e grava de 4 a 8 MB em `auditoria/` (fotos e relatório). Ponha `auditoria/` no `.gitignore` do site.
+- Cada auditoria leva de 20 a 60 segundos e grava de 1 a 12 MB em `auditoria/` (fotos e relatório). Ponha `auditoria/` no `.gitignore` do site.
+- Enquanto testa a amostra, o auditor barra todo envio da página (formulário, `fetch`, qualquer pedido que não seja GET) e toda saída para outro endereço. Nada é enviado ao site, e o relatório lista o que foi barrado.
 - O auditor rola a página e **mexe nos controles** da amostra (sliders, opções, botões) para ver se ela responde. Ele **não envia formulário e não segue link**.
 - **Qual é o botão principal?** Ele escolhe o maior botão cheio da primeira tela e diz qual escolheu no relatório. Se escolheu errado, marque o certo no HTML com o atributo `data-cta` (`<a data-cta href="...">`), ou, em site que você não pode editar, rode com `--cta "seletor-css"`.
 - Página local que usa arquivos fora da pasta dela (`../`) e não está num repositório git: passe `--raiz <pasta que contém tudo>`. O auditor avisa quando algum arquivo deu 404.
@@ -76,7 +77,7 @@ O que saber antes de rodar:
 | Chaves das amostras | `skill/site-que-vende/referencias/amostras.md` | todas as chaves do JSON do quiz e da calculadora, variáveis de cor e o evento de resultado |
 | Os 5 padrões | `skill/site-que-vende/referencias/cinco-padroes.md` | a ideia, os números dos testes e o que é medido |
 | Exemplos | `exemplos/ruim/` e `exemplos/bom/` | o mesmo negócio fictício: um falha nos 5, o outro passa nos 5 |
-| Testes | `tests/rodar.sh` | 30 verificações: o ruim falha com o motivo certo, o bom passa, as amostras funcionam e 4 casos que já enganaram o auditor |
+| Testes | `tests/rodar.sh` | 38 verificações: o ruim falha com o motivo certo, o bom passa, as amostras funcionam e 7 casos que já enganaram o auditor |
 
 ## O processo, do início ao fim (7 passos)
 
@@ -133,6 +134,8 @@ Todas as chaves (inclusive `multiplica`, `margem`, `moeda`, `idioma`): [`amostra
 - Passar nos cinco não garante venda. Tira do caminho cinco motivos comuns de um site perder cliente; o resto é oferta, preço e tráfego.
 - "Sombra", "peça atravessando a borda" e "uma coisa se move por tela" são escolhas de design deste kit. Um site chapado bem resolvido pode vender; o auditor avisa onde ele difere do padrão.
 - As mensagens do auditor estão em português. As páginas auditadas podem estar em português, inglês ou espanhol.
+- Os tetos do auditor (15% de cor de destaque, 2 usos fora de clique, 6 sombras, 7 perguntas, 4 coisas se movendo) são escolhas deste kit, não números de estudo.
+- Um arquivo local é servido em 127.0.0.1 a partir da raiz do repositório git, só enquanto a medição roda.
 
 ## Licença
 

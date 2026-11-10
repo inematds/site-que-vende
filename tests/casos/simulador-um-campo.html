@@ -1,0 +1,7 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Simulador de um campo</title>
+<!-- caso de teste do site-que-vende: simulador com 1 campo e 1 botão; clicar várias vezes NÃO pode virar "comprida demais" -->
+<style>*{box-sizing:border-box}body{margin:0;font:17px/1.5 system-ui,sans-serif;background:#fafaf7;color:#1c1c22}
+section,header{padding:70px 8vw}h1{font-size:44px;margin:0 0 14px;line-height:1.1}.b{display:inline-block;padding:14px 24px;border-radius:10px;text-decoration:none;border:0;font:inherit;font-weight:700;cursor:pointer}
+.hero{background:linear-gradient(120deg,#e9efe9,#fafaf7);min-height:70vh}.g{background:#b45309;color:#fff}</style></head><body><header class="hero"><h1>Energia solar que se paga em 4 anos na sua casa</h1><p>Você informa a conta de luz e vê a economia.</p><a class="b g" data-cta href="#s">Simular minha economia</a></header>
+<section id="s"><h2>Simule</h2><div id="sim"><label>Sua conta de luz (R$) <input type="number" id="v" min="100" max="2000" step="50" value="300"></label> <button type="button" class="b g" id="bs">Simular</button><p id="o"></p></div></section>
+<script>bs.onclick=()=>{o.textContent='Você economiza perto de R$ '+Math.round(v.value*0.85)+' por mês.'}</script></body></html>

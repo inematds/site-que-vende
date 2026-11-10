@@ -59,7 +59,10 @@ Cada opção soma pontos em um ou mais resultados; ganha o resultado com mais po
 | `textoPergunta` | texto | contador, com `{n}` e `{t}` ("Pergunta {n} de {t}") |
 | `idioma` | código | textos fixos em `pt`, `en` ou `es` |
 
-Mantenha de 3 a 5 perguntas: quiz comprido ninguém termina (o auditor falha acima de 7 passos).
+Mantenha de 3 a 5 perguntas: quiz comprido ninguém termina (o auditor falha acima de 7 perguntas).
+
+Comportamentos para saber: no **empate**, ganha o resultado que aparece primeiro em `resultados`; o `titulo` só aparece na
+primeira pergunta; uma opção que dá pontos para uma chave que não existe em `resultados` mostra o erro no lugar do quiz.
 
 ## Aparência
 
@@ -75,7 +78,8 @@ Variáveis CSS na sua página (a amostra herda a fonte):
 
 ## Evento (opcional)
 
-As duas tags disparam `amostra-resultado` quando o resultado muda. Serve para medir uso, sem coletar dado pessoal:
+As duas tags disparam `amostra-resultado` **uma vez por mudança feita pela pessoa** (a conta inicial, ao carregar a página,
+não dispara). Serve para medir uso, sem coletar dado pessoal:
 
 ```js
 document.addEventListener('amostra-resultado', e => console.log(e.detail)); // {min, max} ou {resultado: "chave"}

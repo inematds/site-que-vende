@@ -10,7 +10,7 @@ amostra-calculadora,amostra-quiz{display:block;box-sizing:border-box;max-width:4
 .am-t{font-size:1.15em;font-weight:700;margin:0 0 4px}.am-s{margin:0 0 14px;opacity:.75;font-size:.92em}
 .am-c{margin:0 0 14px;border:0;padding:0}.am-c label,.am-c legend{display:flex;justify-content:space-between;gap:12px;font-weight:600;font-size:.95em;margin:0 0 6px;padding:0;width:100%}
 .am-c input[type=range]{width:100%;height:32px;margin:0;accent-color:var(--amostra-texto,#1b1b1f)}
-.am-o{display:flex;flex-wrap:wrap;gap:8px}.am-o label{display:inline-flex;width:auto;font-weight:500;padding:8px 12px;border:1px solid var(--amostra-borda,rgba(0,0,0,.2));border-radius:999px;cursor:pointer;margin:0}
+.am-o{display:flex;flex-wrap:wrap;gap:8px}.am-o label{display:inline-flex;align-items:center;min-height:44px;box-sizing:border-box;width:auto;font-weight:500;padding:8px 14px;border:1px solid var(--amostra-borda,rgba(0,0,0,.2));border-radius:999px;cursor:pointer;margin:0}
 .am-o input{position:absolute;opacity:0;pointer-events:none}.am-o label:has(input:checked){background:var(--amostra-texto,#1b1b1f);color:var(--amostra-fundo,#fff)}
 .am-o label:has(input:focus-visible),.am-q button:focus-visible,.am-b:focus-visible{outline:3px solid var(--amostra-texto,#1b1b1f);outline-offset:2px}
 .am-r{display:block;margin:6px 0 14px;padding:14px;border-radius:12px;background:rgba(127,127,127,.12)}.am-r b{display:block;font-size:1.6em;line-height:1.15}.am-r small{opacity:.75}
@@ -68,11 +68,13 @@ amostra-calculadora,amostra-quiz{display:block;box-sizing:border-box;max-width:4
       const out = el('output', { class: 'am-r', 'aria-live': 'polite' }); form.append(out);
       if (cfg.botao) form.append(el('a', { class: 'am-b', href: cfg.botao.href || '#', 'data-amostra-cta': '' }, cfg.botao.texto));
       if (cfg.nota) form.append(el('p', { class: 'am-s', style: 'margin:12px 0 0' }, cfg.nota));
+      let ultimo = null; // null = primeira conta, ao carregar: não é uso, não dispara evento
       const calc = () => {
         let total = cfg.base || 0, vezes = 1; for (const l of leitores) { const r = l(); total += r.soma; vezes *= r.vezes; } total *= vezes;
         const m = (cfg.margem ?? 10) / 100, arr = cfg.arredondar || 10, a = Math.round(total * (1 - m) / arr) * arr, b = Math.round(total * (1 + m) / arr) * arr;
         out.replaceChildren(el('small', {}, cfg.prefixo || txt(cfg).prefixo), el('b', {}, a === b ? dinheiro(a, cfg) : dinheiro(a, cfg) + (cfg.ate || txt(cfg).ate) + dinheiro(b, cfg)), el('small', {}, cfg.sufixo || ''));
-        this.dispatchEvent(new CustomEvent('amostra-resultado', { bubbles: true, detail: { min: a, max: b } }));
+        const chave = a + '|' + b; if (ultimo !== null && chave !== ultimo) this.dispatchEvent(new CustomEvent('amostra-resultado', { bubbles: true, detail: { min: a, max: b } }));
+        ultimo = chave;
       };
       form.addEventListener('input', calc); form.addEventListener('change', calc); calc(); this.append(form);
     }
@@ -87,7 +89,8 @@ amostra-calculadora,amostra-quiz{display:block;box-sizing:border-box;max-width:4
       this._ok = true; estilo(); const cfg = ler(this); if (!cfg) return;
       const errQ = !Array.isArray(cfg.perguntas) || !cfg.perguntas.length ? 'falta a lista "perguntas"'
         : (cfg.perguntas.find(q => !q.texto || !Array.isArray(q.opcoes) || !q.opcoes.length) ? 'cada pergunta precisa de "texto" e de uma lista "opcoes"'
-        : (!cfg.resultados || !Object.keys(cfg.resultados).length ? 'falta o objeto "resultados"' : ''));
+        : (!cfg.resultados || !Object.keys(cfg.resultados).length ? 'falta o objeto "resultados"'
+        : ((() => { for (const q of cfg.perguntas) for (const o of q.opcoes) for (const k of Object.keys(o.pontos || {})) if (!(k in cfg.resultados)) return 'a opção "' + o.rotulo + '" dá pontos para "' + k + '", que não existe em "resultados"'; return ''; })())));
       if (errQ) { this.textContent = 'amostra-quiz: ' + errQ; return; }
       this.setAttribute('data-amostra', 'quiz'); const caixa = el('div', { 'aria-live': 'polite' }); this.append(caixa);
       let i = 0, pontos = {};

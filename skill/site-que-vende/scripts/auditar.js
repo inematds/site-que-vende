@@ -38,7 +38,8 @@ Uso:  node auditar.js <url | arquivo.html> [opções]
 
 Código de saída: 0 = os 5 passam · 1 = algum falha · 2 = erro de uso ou a página não abriu.
 O auditor abre a página no computador (1440x900) e no celular (390x844), rola, mexe nos controles da amostra
-(sliders, opções, botões) e NÃO envia formulário nem segue link. Cada auditoria leva de 30 a 60 s.`;
+(sliders, opções, botões). Durante esse teste ele barra todo envio (formulário, fetch, qualquer pedido que não seja GET) e
+toda saída da página: nada é enviado ao site. Cada auditoria leva de 20 a 60 s.`;
 
 const args = process.argv.slice(2);
 if (args.includes('--help') || args.includes('-h')) { console.log(AJUDA); process.exit(0); }
@@ -163,7 +164,13 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
       if (tela.nome === 'desktop') {
         await page.evaluate(() => window.__sqv.marcaTexto(true));
         await page.screenshot({ fullPage: true, path: path.join(saida, 'desktop-marca-texto.png') });
+        // sondagem da amostra: nada sai da página. Todo pedido que não seja GET (envio por formulário, fetch, beacon) e toda
+        // navegação são barrados (a navegação recebe 204, que mantém a página onde está); janela nova é ignorada. O que foi barrado vai para o relatório.
+        const bloq = [];
+        await page.route('**/*', route => { const q = route.request(); if (q.method() !== 'GET' || q.isNavigationRequest()) { bloq.push(q.method() + ' ' + q.url().replace(/^https?:\/\/127\.0\.0\.1:\d+/, '')); return q.isNavigationRequest() ? route.fulfill({ status: 204, body: '' }) : route.abort(); } return route.continue(); });
+        await page.evaluate(() => { window.open = () => null; });
         m.amostra = await page.evaluate(() => window.__sqv.amostra());
+        await espera(300); await page.unroute('**/*'); m.bloqueados = bloq;
       }
       await ctx.close();
       const r = await abrir(browser, url, tela, true); await r.page.waitForLoadState('load', { timeout: 30000 }).catch(() => {}); await espera(1200);
@@ -173,6 +180,7 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
     }
   } finally { await browser.close(); if (srv) srv.close(); }
 
+  if (R.telas.desktop.espelho.erroCta) { console.error(`erro: --cta "${CTA}" não casou com nenhum elemento da página. Confira o seletor (ex.: --cta "a.btn-reservar").`); process.exit(2); }
   // ---------------- julgamento ----------------
   const d = R.telas.desktop, c = R.telas.celular, P = [];
   const padrao = (n, nome, frase) => { const p = { n, nome, frase, falhas: [], avisos: [], medidas: {}, consertar: [] }; P.push(p); return p; };
@@ -180,7 +188,7 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
 
   // 1
   let p = padrao(1, 'Teste do espelho', 'A primeira tela diz para quem é, o que a pessoa ganha e o que fazer agora.');
-  const e = d.espelho; p.medidas = { titulo: e.titulo, subtitulo: e.subtitulo, 'botão principal': e.cta === null ? null : (e.cta || '(sem texto)') + '  [' + e.ctaSel + ', escolhido por: ' + e.ctaPor + ']', 'botão na 1ª tela (desktop)': e.ctaNaTela1, 'botão na 1ª tela (celular)': c.espelho.ctaNaTela1, 'outros botões cheios na 1ª tela': e.outrosTela1 };
+  const e = d.espelho; p.medidas = { titulo: e.titulo, subtitulo: e.subtitulo, 'botão principal': e.cta === null ? null : (e.cta || '(sem texto)') + '  [' + e.ctaSel + ', escolhido por: ' + e.ctaPor + ']', 'botão principal no celular': c.espelho.cta === e.cta ? 'o mesmo' : (c.espelho.cta || '(nenhum)') + '  [' + c.espelho.ctaSel + ']', 'botão na 1ª tela (desktop)': e.ctaNaTela1, 'botão na 1ª tela (celular)': c.espelho.ctaNaTela1, 'outros botões cheios na 1ª tela': e.outrosTela1 };
   if (!e.titulo || !e.tituloNaTela1) falha(p, 'Não há título na primeira tela.', 'Ponha um título (h1) na primeira tela com o resultado que o visitante leva.');
   else {
     const g = GENERICO.find(r => r.test(e.titulo));
@@ -238,19 +246,20 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
   const onde = (a, b) => a === false && b === false ? 'no computador e no celular' : a === false ? 'no computador' : 'no celular';
   const tp = d.pronto.titulo === false ? d.pronto : c.pronto;
   if (d.pronto.titulo === false || c.pronto.titulo === false) falha(p, `O título não está legível 0,4 s depois de a página abrir, ${onde(d.pronto.titulo, c.pronto.titulo)} (${tp.tituloNaTela === false ? 'ele ainda está fora da tela' : 'opacidade ' + tp.opTitulo}): o visitante espera a animação.`, 'Título, texto e botão da primeira tela aparecem prontos, sem fade nem entrada. Animação de entrada só da segunda tela para baixo.');
-  if (d.pronto.botao === false || c.pronto.botao === false) falha(p, `O botão principal não está visível 0,4 s depois de a página abrir, ${onde(d.pronto.botao, c.pronto.botao)}.`, 'O botão da primeira tela aparece pronto, sem animação de entrada.');
+  const bp = d.pronto.botao === false ? d.pronto : c.pronto;
+  if (d.pronto.botao === false || c.pronto.botao === false) falha(p, `O botão principal não está visível 0,4 s depois de a página abrir, ${onde(d.pronto.botao, c.pronto.botao)} (${bp.botaoNaTela === false ? 'ele entra na tela depois, por animação ou porque o conteúdo acima ainda está carregando' : 'opacidade ' + bp.opBotao}).`, 'O botão da primeira tela aparece pronto, sem animação de entrada.');
   if (pior.n > 3) falha(p, `${pior.n} coisas se movem ao mesmo tempo na tela ${pior.tela} (${pior.quem.slice(0, 5).join(', ')}).`, 'Escolha UMA coisa para se mover por tela (o produto, o resultado, o antes e depois) e deixe o resto parado.');
   else if (pior.n > 1) p.avisos.push(`${pior.n} coisas se movem na tela ${pior.tela}; a regra é uma por tela.`);
   if (redMov > 0) falha(p, `Com "reduzir movimento" ligado no aparelho, ${redMov} elemento(s) continuam se movendo.`, 'Respeite prefers-reduced-motion: dentro de @media (prefers-reduced-motion: reduce), desligue animation e transition; no JS, confira matchMedia antes de animar.');
-  if (pior.n === 0) p.avisos.push('Nada se move na página. Tudo bem para vender; se quiser parecer mais caro, mova UMA coisa (o produto).');
+  if (pior.n === 0 && !p.falhas.length) p.avisos.push('Nada se move na página. Tudo bem para vender; se quiser parecer mais caro, mova UMA coisa (o produto).');
 
   // 5
   p = padrao(5, 'Amostra grátis', 'O visitante prova o resultado (quiz, calculadora, ferramenta) antes de deixar o contato.');
-  const a = d.amostra; p.medidas = { 'ferramenta encontrada': a.encontrada ? a.onde : 'não', 'responde na hora': !!a.reage, 'passos até o fim': a.passos || 0, 'campos': a.campos || 0, 'formulário de contato': a.soContato };
+  const a = d.amostra; p.medidas = { 'ferramenta encontrada': a.encontrada ? a.onde : 'não', 'responde na hora': !!a.reage, 'passos até o fim': a.passos || 0, 'campos': a.campos || 0, 'formulário de contato': a.soContato, 'envios barrados durante o teste': (d.bloqueados || []).length };
   if (!a.encontrada) falha(p, a.soContato ? 'A página explica e entrega um formulário de contato: não há nada para o visitante experimentar.' : 'Não há ferramenta para o visitante experimentar (quiz, calculadora, simulador).',
     'Ache a pergunta que todo cliente faz antes de comprar ("quanto custa?", "qual serve para mim?") e responda com uma amostra: copie amostras/amostra.js e use <amostra-calculadora> ou <amostra-quiz>.');
-  else if (!a.reage) falha(p, `Há controles na página (${a.onde}), mas mexer neles não mostra resultado nenhum na tela: isso é formulário, não amostra. (O auditor mexe nos campos e clica, sem enviar o formulário.)`, 'A amostra tem de mostrar o resultado na própria página, na hora, sem enviar nada e sem pedir e-mail antes: use <amostra-calculadora> ou <amostra-quiz> de amostras/amostra.js.');
-  else if (a.passos > 7 || a.campos > 7) falha(p, `A amostra tem ${Math.max(a.passos, a.campos)} passos: comprida demais para alguém chegar ao fim.`, 'Corte a amostra para 3 a 5 perguntas.');
+  else if (!a.reage) falha(p, `Há controles na página (${a.onde}: "${(a.texto || '').slice(0, 50)}…"), mas mexer neles não mostra resultado nenhum na tela: não é uma amostra. (O auditor mexe nos campos e clica; nenhum envio sai da página.)`, 'A amostra tem de mostrar o resultado na própria página, na hora, sem enviar nada e sem pedir e-mail antes: use <amostra-calculadora> ou <amostra-quiz> de amostras/amostra.js.');
+  else if (a.passos > 7 || a.campos > 7) falha(p, `A amostra tem ${a.passos > 7 ? a.passos + ' perguntas em sequência' : a.campos + ' campos'}: comprida demais para alguém chegar ao fim.`, 'Corte a amostra para 3 a 5 perguntas.');
 
   for (const x of P) x.passa = x.falhas.length === 0;
   R.padroes = P; R.nota = P.filter(x => x.passa).length; R.passa = R.nota === 5; R.naoCarregou = [...naoCarregou];
@@ -291,6 +300,7 @@ ${x.revisar ? '<b>Para você responder (o auditor não julga texto)</b><ul>' + x
       for (const f of x.falhas) console.log('         - ' + f);
       for (const f of x.avisos) console.log('         · aviso: ' + f);
     }
+    if ((d.bloqueados || []).length) console.log(`\naviso: ao mexer nos controles, a página tentou ${d.bloqueados.length} envio(s) ou saída(s); o auditor barrou todos (nada foi enviado): ${d.bloqueados.slice(0, 3).join(', ')}`);
     if (naoCarregou.size) console.log(`\naviso: ${naoCarregou.size} arquivo(s) da página não carregaram (404): ${[...naoCarregou].slice(0, 3).join(', ')}` + (ehUrl ? '' : '\n       Página local que usa ../ fora da pasta dela? Passe --raiz <pasta que contém tudo>.'));
     console.log(`\n${R.nota} de 5 padrões passam.  Relatório: ${path.join(saida, 'relatorio.html')}` + (R.passa ? '' : `\nO que consertar (cole no seu agente): ${path.join(saida, 'consertar.md')}`) + '\n');
   }

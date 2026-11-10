@@ -41,8 +41,14 @@ Sai `0` se os cinco passam e `1` se algum falha. Grava em `auditoria/`:
 Primeira vez: `cd $KIT/scripts && npm install && npx playwright install chromium` (baixa o Chromium, uns 150 MB).
 
 O relatório diz qual botão ele tratou como principal. Se for o errado, marque o certo com `data-cta` no HTML
-(ou `--cta "seletor"` em site que você não edita) e meça de novo. O auditor mexe nos controles da amostra, mas não
-envia formulário nem segue link. Ponha `auditoria/` no `.gitignore` do site.
+(ou `--cta "seletor"` em site que você não edita) e meça de novo. Enquanto testa a amostra, o auditor barra todo envio
+(formulário, `fetch`, qualquer pedido que não seja GET) e toda saída da página, e lista o que barrou. Ponha `auditoria/`
+no `.gitignore` do site.
+
+- Site com servidor de desenvolvimento (Vite, Next e parecidos): suba o servidor e audite pela URL (`http://localhost:5173`), não pelo arquivo.
+- Código de saída `2` = a página não abriu, o seletor de `--cta` não casou ou faltou argumento: leia a mensagem, corrija e rode de novo; não é falha dos padrões.
+- Página local que usa `../` fora de um repositório git: passe `--raiz <pasta que contém tudo>`.
+- Os tetos (15% de cor, 2 usos fora de clique, 6 sombras, 7 perguntas, 4 coisas se movendo) são escolhas do kit: se a pessoa discordar de um aviso de design, a decisão é dela.
 
 ### 3. Consertar
 

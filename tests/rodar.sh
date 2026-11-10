@@ -42,9 +42,17 @@ rc=$(caso dois-botoes); tem "$T/dois-botoes.txt" "disputando a primeira tela" "d
 tem "$T/dois-botoes.txt" 'Outro botão da primeira tela diz "Saiba mais"' "dois botões cheios: acusa o botão vago"
 rc=$(caso cartao-irmao); grep -q "pilha de caixas" "$T/cartao-irmao.txt" && ruim "cartão entre seções: deu pilha de caixas" || ok "cartão entre duas seções conta como peça que atravessa"
 rc=$(caso form-envio); [ "$rc" -eq 1 ] && ok "formulário com envio: não navega (sai 1, não 2)" || ruim "formulário com envio: saiu $rc"
-tem "$T/form-envio.txt" "formulário, não amostra" "formulário com envio: não é contado como amostra"
+tem "$T/form-envio.txt" "não é uma amostra" "formulário com envio: não é contado como amostra"
 rc=$(caso botao-neutro); grep -q "ocupa" "$T/botao-neutro.txt" && ruim "botão neutro: falhou por área de cor" || ok "botão neutro: só aviso, sem falha por área"
 tem "$T/botao-neutro.txt" "botão principal é neutro" "botão neutro: aviso presente"
+rc=$(caso envio-por-js); [ "$rc" -eq 1 ] && ok "envio por JS e botão que navega: termina com código 1" || { ruim "envio por JS: saiu $rc"; cat "$T/envio-por-js.txt"; }
+node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1]));const b=r.telas.desktop.bloqueados||[];process.exit(b.some(x=>x.startsWith("POST"))?0:1)' "$T/envio-por-js/relatorio.json" && ok "envio por JS: POST barrado e listado no relatório" || ruim "envio por JS: não barrou o POST"
+rc=$(caso nav-por-js); [ "$rc" -eq 1 ] && ok "botão que navega por JS: termina com código 1" || { ruim "botão que navega por JS: saiu $rc"; cat "$T/nav-por-js.txt"; }
+node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1]));const b=r.telas.desktop.bloqueados||[];process.exit(b.some(x=>x.includes("navegou-por-js"))?0:1)' "$T/nav-por-js/relatorio.json" && ok "botão que navega por JS: saída barrada e listada" || ruim "botão que navega por JS: não barrou a saída"
+tem "$T/envio-por-js.txt" "o auditor barrou todos" "envio por JS: avisa no terminal o que barrou"
+rc=$(caso simulador-um-campo); grep -q "comprida demais" "$T/simulador-um-campo.txt" && ruim "simulador de 1 campo: deu comprida demais" || ok "simulador de 1 campo: 1 passo, não vários"
+grep -q "PASSA  5" "$T/simulador-um-campo.txt" && ok "simulador de 1 campo: padrão 5 passa" || ruim "simulador de 1 campo: padrão 5 não passou"
+$A exemplos/ruim/index.html --cta ".nao-existe" --saida "$T/ctax" > "$T/ctax.txt" 2>&1; [ $? -eq 2 ] && grep -q "não casou" "$T/ctax.txt" && ok "--cta que não casa: erro claro (sai 2)" || ruim "--cta que não casa passou calado"
 $A exemplos/ruim/index.html --cta "a.botao.mais" --saida "$T/cta" > "$T/cta.txt" 2>&1
 tem "$T/cta.txt" 'O botão diz "Saiba mais"' "--cta escolhe o botão indicado"
 $A --help | grep -q -- "--cta" && ok "--help" || ruim "--help"

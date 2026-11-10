@@ -57,11 +57,20 @@
     const t = el.tagName.toLowerCase();
     if (el.id) return t + '#' + el.id;
     const c = [...el.classList].slice(0, 2).join('.');
-    return t + (c ? '.' + c : '');
+    if (c) return t + '.' + c;
+    const pai = el.parentElement; if (!pai) return t;
+    const irm = [...pai.children].filter(x => x.tagName === el.tagName);
+    const eu = t + (irm.length > 1 ? ':nth-of-type(' + (irm.indexOf(el) + 1) + ')' : '');
+    const p = pai.id ? pai.tagName.toLowerCase() + '#' + pai.id : pai.classList[0] ? pai.tagName.toLowerCase() + '.' + pai.classList[0] : pai.tagName.toLowerCase();
+    return p + ' > ' + eu;
   }
   const rotulo = el => texto(el) || el.getAttribute('title') || (el.querySelector && el.querySelector('img[alt]') ? el.querySelector('img[alt]').alt : '') || '';
 
   // ---------- botão principal (CTA) ----------
+  function pertoDoTitulo(r) { // o botão da promessa fica logo abaixo (ou ao lado) do título
+    const h = document.querySelector('h1'); if (!h) return false; const hr = h.getBoundingClientRect();
+    return r.top >= hr.top - 10 && r.top - hr.bottom < 320;
+  }
   function botoes() {
     const out = [];
     for (const el of document.querySelectorAll('a,button,input[type=submit],input[type=button],[role=button]')) {
@@ -74,19 +83,21 @@
       const txt = rotulo(el);
       // botão flutuante sem texto (ícone de WhatsApp, chat) pesa pouco: quase nunca é a ação principal da página
       out.push({ el, cor: f, atras, d, r: rot, texto: txt, sel: seletor(el), marcado: el.hasAttribute('data-cta') || (window.__sqvCta && el.matches(window.__sqvCta)),
-        peso: r.width * r.height * (d / 255) * (saturada(f) ? 1.6 : 1) * (!txt ? .15 : 1) * (flutua ? .5 : 1) });
+        peso: Math.min(r.width, 360) * r.height * (d / 255) * (saturada(f) ? 1.6 : 1) * (!txt ? .15 : 1) * (flutua ? .5 : 1)
+          * (pertoDoTitulo(r) ? 2 : 1) * (el.closest('form') && (el.type === 'submit' || el.tagName === 'INPUT') ? .5 : 1) });
     }
     return out;
   }
   function cta() {
     const bs = botoes(); if (!bs.length) return null;
     const marc = bs.filter(b => b.marcado);
+    if (window.__sqvCta && !document.querySelector(window.__sqvCta)) return { erroCta: true };
     const tela1 = bs.filter(b => b.r.top + b.r.h <= VH() + 2);
     const lista = marc.length ? marc : tela1.length ? tela1 : bs;
     const b = lista.reduce((a, x) => x.peso > a.peso ? x : a);
     // outros botões cheios na 1ª tela, com outro texto: disputam a atenção (cor diferente pesa mais; mesma cor também conta se for grande)
     const outros = tela1.filter(x => x !== b && x.texto && x.texto !== b.texto && x.peso > b.peso * .3 && !x.el.closest('nav,header nav'));
-    return Object.assign({}, b, { naTela1: b.r.top + b.r.h <= VH() + 2, escolhidoPor: marc.length ? 'data-cta' : 'maior botão cheio da 1ª tela',
+    return Object.assign({}, b, { naTela1: b.r.top + b.r.h <= VH() + 2, escolhidoPor: marc.length ? (window.__sqvCta ? '--cta' : 'data-cta') : 'botão cheio de maior peso na 1ª tela (tamanho, cor e proximidade do título)',
       concorrentes: outros.filter(x => dist(x.cor, b.cor) > 40).map(x => x.texto), outrosTela1: outros.map(x => x.texto) });
   }
   function titulo() {
@@ -114,10 +125,10 @@
 
   // ---------- 1. espelho ----------
   function espelho() {
-    const h = titulo(), c = cta();
+    const h = titulo(); let c = cta(); const erroCta = !!(c && c.erroCta); if (erroCta) c = null;
     const hr = h && h.getBoundingClientRect();
     return {
-      titulo: h ? texto(h) : null, tituloNaTela1: !!h && hr.top + scrollY < VH() - 20,
+      erroCta, titulo: h ? texto(h) : null, tituloNaTela1: !!h && hr.top + scrollY < VH() - 20,
       subtitulo: subtitulo(h), cta: c ? c.texto : null, ctaSel: c ? c.sel : null, ctaPor: c ? c.escolhidoPor : null, ctaNaTela1: !!c && c.naTela1,
       concorrentes: c ? c.concorrentes : [], outrosTela1: c ? c.outrosTela1 : [],
       imagensTela1: [...document.images].filter(i => visivel(i) && i.getBoundingClientRect().top < VH()).map(i => i.alt || i.currentSrc.split('/').pop()).slice(0, 6),
@@ -126,7 +137,7 @@
 
   // ---------- 2. marca-texto ----------
   function marcaTexto(pintar) {
-    const c = cta(); if (!c) return { semCta: true };
+    const c = cta(); if (!c || c.erroCta) return { semCta: true };
     const alvo = c.cor, usos = [], cliques = [];
     const els = [...document.body.querySelectorAll('*')].slice(0, 4000);
     for (const el of els) {
@@ -188,7 +199,7 @@
       if (i === k) continue; const inv = Math.min(rs[i].b, rs[k].b) - Math.max(rs[i].t, rs[k].t);
       if (inv >= 20 && inv < (rs[i].b - rs[i].t) - 20 && (rs[i].b - rs[i].t) <= (rs[k].b - rs[k].t) && !cruzam.includes(rs[i].e)) cruzam.push(rs[i].e);
     }
-    let sombras = 0, caixas = 0; const c = cta(); let ctaSombra = false;
+    let sombras = 0, caixas = 0; let c = cta(); if (c && c.erroCta) c = null; let ctaSombra = false;
     for (const el of document.body.querySelectorAll('*')) {
       if (!visivel(el) || el instanceof SVGElement) continue; const cs = getComputedStyle(el), r = el.getBoundingClientRect(), a = r.width * r.height;
       const bs = cs.boxShadow || '', mm = /(-?[\d.]+)px (-?[\d.]+)px ([\d.]+)px/.exec(bs);
@@ -223,8 +234,10 @@
     return raizes.map(el => (el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + (el.classList[0] ? '.' + el.classList[0] : '')));
   }
   function textoPronto() {
-    const h = titulo(), c = cta(); const ok = el => !!el && opacidade(el) >= .9 && naTela(el.getBoundingClientRect());
-    return { titulo: h ? ok(h) : null, botao: c && c.naTela1 ? ok(c.el) : null, opTitulo: h ? +opacidade(h).toFixed(2) : null, tituloNaTela: h ? naTela(h.getBoundingClientRect()) : null };
+    const h = titulo(); let c = cta(); if (c && c.erroCta) c = null; const ok = el => !!el && opacidade(el) >= .9 && naTela(el.getBoundingClientRect());
+    const b = c && c.naTela1 ? c.el : null;
+    return { titulo: h ? ok(h) : null, botao: b ? ok(b) : null, opTitulo: h ? +opacidade(h).toFixed(2) : null, tituloNaTela: h ? naTela(h.getBoundingClientRect()) : null,
+      opBotao: b ? +opacidade(b).toFixed(2) : null, botaoNaTela: b ? naTela(b.getBoundingClientRect()) : null };
   }
 
   // ---------- 5. amostra grátis ----------
@@ -257,23 +270,30 @@
   async function sondar() {
     const rec = recipientesAmostra();
     const soContato = !!document.querySelector('form input[type=email],form input[type=tel],form textarea');
+    // "controles" = o que a pessoa pode responder agora (rótulos e botões). Passo novo = os controles mudaram (outra pergunta).
+    const controles = c => [...c.querySelectorAll('button,[role=button],[role=radio],legend')].filter(visivel).map(texto).join('|') + '#' + c.querySelectorAll('input,select,textarea').length;
     let melhor = null;
     for (const c of rec.slice(0, 4)) {
-      let passos = 0, antes = texto(c); const campos = c.querySelectorAll('input:not([type=hidden]):not([type=submit]),select,textarea').length;
+      let passos = 0, reage = false, antes = texto(c), ctrl = controles(c);
+      const campos = c.querySelectorAll('input:not([type=hidden]):not([type=submit]),select,textarea').length;
       for (let i = 0; i < 12; i++) {
         for (const el of c.querySelectorAll('input[type=range],input[type=number]')) {
-          const mn = parseFloat(el.min || 0), mx = parseFloat(el.max || 100), v = Math.round((mn + (mx - mn) * (.35 + .1 * i)) / (parseFloat(el.step) || 1)) * (parseFloat(el.step) || 1);
+          const mn = parseFloat(el.min || 0), mx = parseFloat(el.max || 100), st = parseFloat(el.step) || 1, v = Math.round((mn + (mx - mn) * (.35 + .1 * i)) / st) * st;
           Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, String(Math.min(mx, v)));
           el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true }));
         }
         for (const el of c.querySelectorAll('select')) { if (el.options.length > 1) { el.selectedIndex = Math.min(el.options.length - 1, 1 + (i % 2)); el.dispatchEvent(new Event('change', { bubbles: true })); el.dispatchEvent(new Event('input', { bubbles: true })); } }
         const r = [...c.querySelectorAll('input[type=radio],input[type=checkbox]')].find(e => visivel(e) || visivel(e.parentElement)); if (r && !r.checked) r.click();
         const b = [...c.querySelectorAll('button,[role=button],[role=radio]')].find(e => visivel(e) && !e.disabled && e.type !== 'reset' && !(e.tagName === 'A' && !(e.getAttribute('href') || '#').startsWith('#')) && !/voltar|refazer|de novo|back|again|start over|volver|otra vez|de nuevo/i.test(texto(e)));
-        if (b) b.click(); else if (i > 0) break; // sem botão de avançar = ferramenta de um passo só
+        if (b) b.click();
         await new Promise(res => setTimeout(res, 260));
-        const depois = texto(c); if (depois === antes) break; passos++; antes = depois;
+        const depois = texto(c), ctrl2 = controles(c);
+        if (depois !== antes) reage = true;
+        if (ctrl2 !== ctrl) { passos++; ctrl = ctrl2; antes = depois; continue; }   // apareceu outra pergunta: segue
+        break;                                                                       // mesmos controles: é ferramenta de uma tela só
       }
-      const m = { reage: passos > 0, passos, campos, onde: c.tagName.toLowerCase() + (c.id ? '#' + c.id : ''), texto: texto(c).slice(0, 160) };
+      if (reage && passos === 0) passos = 1;
+      const m = { reage, passos, campos, onde: seletor(c), texto: texto(c).slice(0, 80) };
       if (!melhor || (m.reage && !melhor.reage)) melhor = m;
     }
     return { encontrada: !!melhor, soContato, ...(melhor || {}) };
