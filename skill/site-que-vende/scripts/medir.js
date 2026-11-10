@@ -239,7 +239,7 @@
         }
         for (const el of c.querySelectorAll('select')) { if (el.options.length > 1) { el.selectedIndex = Math.min(el.options.length - 1, 1 + (i % 2)); el.dispatchEvent(new Event('change', { bubbles: true })); el.dispatchEvent(new Event('input', { bubbles: true })); } }
         const r = [...c.querySelectorAll('input[type=radio],input[type=checkbox]')].find(e => visivel(e) || visivel(e.parentElement)); if (r && !r.checked) r.click();
-        const b = [...c.querySelectorAll('button,[role=button],[role=radio]')].find(e => visivel(e) && !e.disabled && e.type !== 'reset' && !/voltar|refazer|de novo|back|again|volver|otra vez/i.test(texto(e)));
+        const b = [...c.querySelectorAll('button,[role=button],[role=radio]')].find(e => visivel(e) && !e.disabled && e.type !== 'reset' && !/voltar|refazer|de novo|back|again|start over|volver|otra vez|de nuevo/i.test(texto(e)));
         if (b) b.click(); else if (i > 0) break; // sem botão de avançar = ferramenta de um passo só
         await new Promise(res => setTimeout(res, 260));
         const depois = texto(c); if (depois === antes) break; passos++; antes = depois;

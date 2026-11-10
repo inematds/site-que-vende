@@ -27,6 +27,11 @@ amostra-calculadora,amostra-quiz{display:block;box-sizing:border-box;max-width:4
     try { return JSON.parse(s.textContent); } catch (err) { host.textContent = 'amostra: configuração JSON inválida (' + err.message + ')'; return null; }
   }
   const dinheiro = (v, cfg) => new Intl.NumberFormat(cfg.idioma || document.documentElement.lang || 'pt-BR', { style: 'currency', currency: cfg.moeda || 'BRL', maximumFractionDigits: 0 }).format(v);
+  // textos fixos em 3 idiomas: segue "idioma" do JSON ou o lang da página (pt, en, es); cada um pode ser trocado no JSON
+  const TXT = { pt: { pergunta: 'Pergunta {n} de {t}', ate: ' a ', prefixo: 'Estimativa', paraVoce: 'Para você', refazer: 'Responder de novo' },
+    en: { pergunta: 'Question {n} of {t}', ate: ' to ', prefixo: 'Estimate', paraVoce: 'For you', refazer: 'Start over' },
+    es: { pergunta: 'Pregunta {n} de {t}', ate: ' a ', prefixo: 'Estimación', paraVoce: 'Para ti', refazer: 'Responder de nuevo' } };
+  const txt = cfg => TXT[String(cfg.idioma || document.documentElement.lang || 'pt').slice(0, 2).toLowerCase()] || TXT.pt;
   let n = 0;
 
   // <amostra-calculadora>: resultado = (base + soma dos campos) × multiplicadores, mostrado como faixa (± margem)
@@ -61,7 +66,7 @@ amostra-calculadora,amostra-quiz{display:block;box-sizing:border-box;max-width:4
       const calc = () => {
         let total = cfg.base || 0, vezes = 1; for (const l of leitores) { const r = l(); total += r.soma; vezes *= r.vezes; } total *= vezes;
         const m = (cfg.margem ?? 10) / 100, arr = cfg.arredondar || 10, a = Math.round(total * (1 - m) / arr) * arr, b = Math.round(total * (1 + m) / arr) * arr;
-        out.replaceChildren(el('small', {}, cfg.prefixo || 'Estimativa'), el('b', {}, a === b ? dinheiro(a, cfg) : dinheiro(a, cfg) + ' a ' + dinheiro(b, cfg)), el('small', {}, cfg.sufixo || ''));
+        out.replaceChildren(el('small', {}, cfg.prefixo || txt(cfg).prefixo), el('b', {}, a === b ? dinheiro(a, cfg) : dinheiro(a, cfg) + (cfg.ate || txt(cfg).ate) + dinheiro(b, cfg)), el('small', {}, cfg.sufixo || ''));
         this.dispatchEvent(new CustomEvent('amostra-resultado', { bubbles: true, detail: { min: a, max: b } }));
       };
       form.addEventListener('input', calc); form.addEventListener('change', calc); calc(); this.append(form);
@@ -81,13 +86,13 @@ amostra-calculadora,amostra-quiz{display:block;box-sizing:border-box;max-width:4
         const p = cfg.perguntas[i]; const ops = el('div', { class: 'am-q', role: 'group', 'aria-label': p.texto });
         p.opcoes.forEach(o => { const b = el('button', { type: 'button' }, o.rotulo);
           b.addEventListener('click', () => { for (const [k, v] of Object.entries(o.pontos || {})) pontos[k] = (pontos[k] || 0) + v; i++; (i < cfg.perguntas.length ? pergunta : resultado)(); }); ops.append(b); });
-        caixa.replaceChildren(...(i === 0 && cfg.titulo ? [el('p', { class: 'am-t' }, cfg.titulo)] : []), el('p', { class: 'am-p' }, `Pergunta ${i + 1} de ${cfg.perguntas.length}`), el('p', { class: 'am-t' }, p.texto), ops);
+        caixa.replaceChildren(...(i === 0 && cfg.titulo ? [el('p', { class: 'am-t' }, cfg.titulo)] : []), el('p', { class: 'am-p' }, (cfg.textoPergunta || txt(cfg).pergunta).replace('{n}', i + 1).replace('{t}', cfg.perguntas.length)), el('p', { class: 'am-t' }, p.texto), ops);
         if (i > 0) ops.querySelector('button').focus({ preventScroll: true });
       };
       const resultado = () => {
         const chave = Object.keys(cfg.resultados).reduce((a, k) => (pontos[k] || 0) > (pontos[a] || 0) ? k : a), r = cfg.resultados[chave];
-        const de = el('button', { type: 'button', class: 'am-l' }, cfg.refazer || 'Responder de novo'); de.addEventListener('click', () => { i = 0; pontos = {}; pergunta(); });
-        const out = el('output', { class: 'am-r' }, el('small', {}, cfg.prefixo || 'Para você'), el('b', {}, r.titulo), el('small', {}, r.texto || ''));
+        const de = el('button', { type: 'button', class: 'am-l' }, cfg.refazer || txt(cfg).refazer); de.addEventListener('click', () => { i = 0; pontos = {}; pergunta(); });
+        const out = el('output', { class: 'am-r' }, el('small', {}, cfg.prefixo || txt(cfg).paraVoce), el('b', {}, r.titulo), el('small', {}, r.texto || ''));
         caixa.replaceChildren(out, ...(r.botao ? [el('a', { class: 'am-b', href: r.botao.href || '#', 'data-amostra-cta': '' }, r.botao.texto)] : []), de);
         this.dispatchEvent(new CustomEvent('amostra-resultado', { bubbles: true, detail: { resultado: chave } }));
       };
