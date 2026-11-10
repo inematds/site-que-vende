@@ -9,7 +9,7 @@ amostra-calculadora,amostra-quiz{display:block;box-sizing:border-box;max-width:4
   background:var(--amostra-fundo,#fff);color:var(--amostra-texto,#1b1b1f);border:1px solid var(--amostra-borda,rgba(0,0,0,.12));text-align:left}
 .am-t{font-size:1.15em;font-weight:700;margin:0 0 4px}.am-s{margin:0 0 14px;opacity:.75;font-size:.92em}
 .am-c{margin:0 0 14px;border:0;padding:0}.am-c label,.am-c legend{display:flex;justify-content:space-between;gap:12px;font-weight:600;font-size:.95em;margin:0 0 6px;padding:0;width:100%}
-.am-c input[type=range]{width:100%;accent-color:var(--amostra-texto,#1b1b1f)}
+.am-c input[type=range]{width:100%;height:32px;margin:0;accent-color:var(--amostra-texto,#1b1b1f)}
 .am-o{display:flex;flex-wrap:wrap;gap:8px}.am-o label{display:inline-flex;width:auto;font-weight:500;padding:8px 12px;border:1px solid var(--amostra-borda,rgba(0,0,0,.2));border-radius:999px;cursor:pointer;margin:0}
 .am-o input{position:absolute;opacity:0;pointer-events:none}.am-o label:has(input:checked){background:var(--amostra-texto,#1b1b1f);color:var(--amostra-fundo,#fff)}
 .am-o label:has(input:focus-visible),.am-q button:focus-visible,.am-b:focus-visible{outline:3px solid var(--amostra-texto,#1b1b1f);outline-offset:2px}
@@ -42,6 +42,11 @@ amostra-calculadora,amostra-quiz{display:block;box-sizing:border-box;max-width:4
       if (this._ok) return;
       if (!this.querySelector('script[type="application/json"]') && document.readyState === 'loading') return document.addEventListener('DOMContentLoaded', () => this.connectedCallback(), { once: true });
       this._ok = true; estilo(); const cfg = ler(this); if (!cfg) return; const id = 'am' + (++n);
+      const errC = !Array.isArray(cfg.campos) || !cfg.campos.length ? 'falta a lista "campos"'
+        : (cfg.campos.find(c => !['faixa', 'opcoes'].includes(c.tipo)) ? 'campo com "tipo" desconhecido: use "faixa" ou "opcoes"'
+        : (cfg.campos.find(c => c.tipo === 'opcoes' && (!Array.isArray(c.opcoes) || !c.opcoes.length)) ? 'campo "opcoes" sem a lista "opcoes"'
+        : (cfg.campos.find(c => c.tipo === 'faixa' && (c.min === undefined || c.max === undefined)) ? 'campo "faixa" precisa de "min" e "max"' : '')));
+      if (errC) { this.textContent = 'amostra-calculadora: ' + errC; return; }
       this.setAttribute('data-amostra', 'calculadora');
       const form = el('form', { novalidate: '' }); form.addEventListener('submit', e => e.preventDefault());
       if (cfg.titulo) form.append(el('p', { class: 'am-t' }, cfg.titulo)); if (cfg.subtitulo) form.append(el('p', { class: 'am-s' }, cfg.subtitulo));
@@ -80,6 +85,10 @@ amostra-calculadora,amostra-quiz{display:block;box-sizing:border-box;max-width:4
       if (this._ok) return;
       if (!this.querySelector('script[type="application/json"]') && document.readyState === 'loading') return document.addEventListener('DOMContentLoaded', () => this.connectedCallback(), { once: true });
       this._ok = true; estilo(); const cfg = ler(this); if (!cfg) return;
+      const errQ = !Array.isArray(cfg.perguntas) || !cfg.perguntas.length ? 'falta a lista "perguntas"'
+        : (cfg.perguntas.find(q => !q.texto || !Array.isArray(q.opcoes) || !q.opcoes.length) ? 'cada pergunta precisa de "texto" e de uma lista "opcoes"'
+        : (!cfg.resultados || !Object.keys(cfg.resultados).length ? 'falta o objeto "resultados"' : ''));
+      if (errQ) { this.textContent = 'amostra-quiz: ' + errQ; return; }
       this.setAttribute('data-amostra', 'quiz'); const caixa = el('div', { 'aria-live': 'polite' }); this.append(caixa);
       let i = 0, pontos = {};
       const pergunta = () => {
@@ -92,8 +101,9 @@ amostra-calculadora,amostra-quiz{display:block;box-sizing:border-box;max-width:4
       const resultado = () => {
         const chave = Object.keys(cfg.resultados).reduce((a, k) => (pontos[k] || 0) > (pontos[a] || 0) ? k : a), r = cfg.resultados[chave];
         const de = el('button', { type: 'button', class: 'am-l' }, cfg.refazer || txt(cfg).refazer); de.addEventListener('click', () => { i = 0; pontos = {}; pergunta(); });
-        const out = el('output', { class: 'am-r' }, el('small', {}, cfg.prefixo || txt(cfg).paraVoce), el('b', {}, r.titulo), el('small', {}, r.texto || ''));
+        const out = el('output', { class: 'am-r', tabindex: '-1' }, el('small', {}, cfg.prefixo || txt(cfg).paraVoce), el('b', {}, r.titulo), el('small', {}, r.texto || ''));
         caixa.replaceChildren(out, ...(r.botao ? [el('a', { class: 'am-b', href: r.botao.href || '#', 'data-amostra-cta': '' }, r.botao.texto)] : []), de);
+        out.focus({ preventScroll: true });
         this.dispatchEvent(new CustomEvent('amostra-resultado', { bubbles: true, detail: { resultado: chave } }));
       };
       pergunta();

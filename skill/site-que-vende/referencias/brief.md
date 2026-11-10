@@ -30,11 +30,11 @@ Para quem é: <1>
 O que a pessoa ganha: <2>
 Ação principal (um botão, marcado com data-cta): <3>
 Palavra que ela usa: <4>
-Amostra grátis (responde a "<5>"): use amostras/amostra.js com <amostra-calculadora> ou <amostra-quiz>; os números são estes: <...>
+Amostra grátis (responde a "<5>"): copie o arquivo amostra.js do kit site-que-vende (skill/site-que-vende/amostras/) para este site e use <amostra-calculadora> ou <amostra-quiz>; os números são estes: <...>
 Cores: fundo <hex>, estrutura <hex>, destaque <hex> (destaque só em botões e links).
 Primeira tela: título, uma linha de apoio e o botão, prontos sem animação, com uma foto real no fundo.
 Uma peça atravessa a borda da primeira seção. Sombra só no botão e no cartão principal.
 No máximo uma coisa se move por tela, e nada se move com prefers-reduced-motion: reduce.
 Não invente depoimento, número nem cliente.
-Depois rode: node scripts/auditar.js index.html  e conserte até dar 5 de 5.
+Depois rode o auditor do kit: node <pasta-do-kit>/skill/site-que-vende/scripts/auditar.js index.html  e conserte até dar 5 de 5.
 ```

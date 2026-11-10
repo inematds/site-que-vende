@@ -10,6 +10,11 @@ Esta skill não confia no olho: ela **mede** os cinco padrões no navegador e s�
 
 Explicação de cada padrão, com os números dos testes: `referencias/cinco-padroes.md`.
 
+**Caminhos.** Os caminhos deste arquivo (`scripts/`, `amostras/`, `referencias/`) são relativos à pasta desta skill
+(`~/.claude/skills/site-que-vende/` quando instalada, ou `skill/site-que-vende/` dentro do repositório do kit). Você
+trabalha na pasta do site do cliente: chame o auditor pelo caminho completo e **copie** `amostras/amostra.js` para
+dentro do site. Abaixo, `$KIT` é essa pasta.
+
 ## Quando NÃO usar
 
 Site que não vende nada (portfólio de arte, convite, página de evento visual): os padrões 1 e 5 não se aplicam.
@@ -26,14 +31,18 @@ respostas em `BRIEF.md`. São três respostas obrigatórias: para quem é, o que
 ### 2. Medir
 
 ```bash
-node scripts/auditar.js <url ou arquivo.html> --saida auditoria
+node $KIT/scripts/auditar.js <url ou arquivo.html> --saida auditoria
 ```
 
 Sai `0` se os cinco passam e `1` se algum falha. Grava em `auditoria/`:
 `relatorio.html` (para a pessoa abrir), `relatorio.json` (medidas), `consertar.md` (lista do que fazer) e
 `desktop-marca-texto.png` (a cor do botão marcada em tudo que não é clique).
 
-Primeira vez: `cd scripts && npm install && npx playwright install chromium`.
+Primeira vez: `cd $KIT/scripts && npm install && npx playwright install chromium` (baixa o Chromium, uns 150 MB).
+
+O relatório diz qual botão ele tratou como principal. Se for o errado, marque o certo com `data-cta` no HTML
+(ou `--cta "seletor"` em site que você não edita) e meça de novo. O auditor mexe nos controles da amostra, mas não
+envia formulário nem segue link. Ponha `auditoria/` no `.gitignore` do site.
 
 ### 3. Consertar
 
@@ -44,8 +53,8 @@ Leia `auditoria/consertar.md` e conserte **só o que falhou**, um padrão por ve
 - Padrão 2: três cores só. A do botão não aparece em título, ícone, borda nem fundo.
 - Padrão 3: algo real no fundo da primeira tela; UMA peça entrando na seção de baixo; sombra só no botão e num cartão.
 - Padrão 4: primeira tela sem animação de entrada; uma coisa se move por tela; `@media (prefers-reduced-motion: reduce)` desliga tudo.
-- Padrão 5: copie `amostras/amostra.js` para o site e use `<amostra-calculadora>` ou `<amostra-quiz>`
-  (modelo em `amostras/exemplo.html`). A pergunta da amostra é a que todo cliente faz antes de comprar.
+- Padrão 5: copie `$KIT/amostras/amostra.js` para o site e use `<amostra-calculadora>` ou `<amostra-quiz>`
+  (modelo em `amostras/exemplo.html`, todas as chaves em `referencias/amostras.md`). A pergunta da amostra é a que todo cliente faz antes de comprar.
   **Os números da calculadora vêm do dono do negócio**; se não tiver, pergunte.
 
 ### 4. Medir de novo

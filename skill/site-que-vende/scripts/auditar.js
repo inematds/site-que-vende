@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // site-que-vende — mede os 5 padrões na página renderizada e diz o que consertar.
 //
-// Uso: node auditar.js <url | arquivo.html> [--saida pasta] [--json] [--raiz pasta]
+// Uso: node auditar.js <url | arquivo.html> [--saida pasta] [--cta seletor] [--raiz pasta] [--json]   (--help explica)
 //
 //   1. Espelho      a 1ª tela tem título, promessa e UM botão que diz o que acontece (desktop e celular)
 //   2. Marca-texto  a cor do botão só aparece no que é clique; divisão do espaço (regra 60/30/10)
@@ -18,19 +18,34 @@ const http = require('node:http');
 const os = require('node:os');
 
 function carregarPlaywright() {
-  const lugares = [process.env.PLAYWRIGHT_DIR, __dirname, process.cwd(),
-    path.join(os.homedir(), 'projetos', 'site-inspirado', 'skill', 'site-inspirado', 'scripts'),
-    path.join(os.homedir(), 'projetos', 'agent-browser')].filter(Boolean);
+  const lugares = [process.env.PLAYWRIGHT_DIR, __dirname, process.cwd()].filter(Boolean);
   for (const l of lugares) { const p = path.join(l, 'node_modules', 'playwright'); if (fs.existsSync(p)) return require(p); }
-  console.error('Playwright não encontrado. Rode uma vez:\n  cd "' + __dirname + '" && npm install && npx playwright install chromium');
+  try { return require('playwright'); } catch (_) { /* segue para a mensagem */ }
+  console.error('Playwright não encontrado. Rode uma vez (baixa o Chromium, uns 150 MB):\n  cd "' + __dirname + '" && npm install && npx playwright install chromium');
   process.exit(2);
 }
 
+const AJUDA = `site-que-vende: mede os 5 padrões do site que vende na página renderizada.
+
+Uso:  node auditar.js <url | arquivo.html> [opções]
+
+  --saida <pasta>   onde gravar relatorio.html, relatorio.json, consertar.md e as fotos (padrão: ./auditoria)
+  --cta <seletor>   diz qual é o botão principal (CSS), sem editar o HTML. Ex.: --cta "a.btn-reservar"
+                    (na sua página, o jeito é marcar o botão com o atributo data-cta)
+  --raiz <pasta>    arquivo local que usa ../ fora da pasta dele: a pasta que o servidor de teste deve servir
+  --json            imprime o relatório em JSON no lugar do texto
+  --help            esta ajuda
+
+Código de saída: 0 = os 5 passam · 1 = algum falha · 2 = erro de uso ou a página não abriu.
+O auditor abre a página no computador (1440x900) e no celular (390x844), rola, mexe nos controles da amostra
+(sliders, opções, botões) e NÃO envia formulário nem segue link. Cada auditoria leva de 30 a 60 s.`;
+
 const args = process.argv.slice(2);
-const alvo = args.find(x => !x.startsWith('--') && args[args.indexOf(x) - 1] !== '--saida' && args[args.indexOf(x) - 1] !== '--raiz');
+if (args.includes('--help') || args.includes('-h')) { console.log(AJUDA); process.exit(0); }
+const alvo = args.find(x => !x.startsWith('--') && !['--saida', '--raiz', '--cta'].includes(args[args.indexOf(x) - 1]));
 const opt = n => { const i = args.indexOf('--' + n); return i >= 0 ? args[i + 1] : null; };
 const soJson = args.includes('--json');
-if (!alvo) { console.error('uso: node auditar.js <url | arquivo.html> [--saida pasta] [--json] [--raiz pasta]'); process.exit(2); }
+if (!alvo) { console.error('uso: node auditar.js <url | arquivo.html> [--saida pasta] [--cta seletor] [--raiz pasta] [--json]   (--help explica)'); process.exit(2); }
 const ehUrl = /^https?:\/\//i.test(alvo);
 if (!ehUrl && !fs.existsSync(alvo)) { console.error('arquivo não encontrado: ' + alvo); process.exit(2); }
 const saida = path.resolve(opt('saida') || 'auditoria');
@@ -45,8 +60,8 @@ function servir() { // arquivo local: serve a partir da raiz do repositório (a 
   if (opt('raiz')) raiz = path.resolve(opt('raiz'));
   const srv = http.createServer((req, res) => {
     let f = path.join(raiz, decodeURIComponent(req.url.split('?')[0]));
-    if (f.startsWith(raiz) && fs.existsSync(f) && fs.statSync(f).isDirectory()) f = path.join(f, 'index.html');
-    if (!f.startsWith(raiz) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+    if ((f === raiz || f.startsWith(raiz + path.sep)) && fs.existsSync(f) && fs.statSync(f).isDirectory()) f = path.join(f, 'index.html');
+    if (!(f === raiz || f.startsWith(raiz + path.sep)) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
     res.writeHead(200, { 'Content-Type': MIME[path.extname(f).toLowerCase()] || 'application/octet-stream' });
     fs.createReadStream(f).pipe(res);
   });
@@ -56,6 +71,8 @@ function servir() { // arquivo local: serve a partir da raiz do repositório (a 
 const TELAS = [{ nome: 'desktop', width: 1440, height: 900 }, { nome: 'celular', width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }];
 const MEDIR = fs.readFileSync(path.join(__dirname, 'medir.js'), 'utf8');
 const espera = ms => new Promise(r => setTimeout(r, ms));
+const CTA = opt('cta');
+const naoCarregou = new Set();
 
 // frases que servem para qualquer empresa = não servem para ninguém
 const GENERICO = [/bem[- ]vind/i, /welcome to/i, /bienvenid/i, /solu[çc][õo]es? (inovador|inteligent|completa|digita)/i, /innovative solutions?/i, /soluciones innovadoras/i,
@@ -63,6 +80,7 @@ const GENERICO = [/bem[- ]vind/i, /welcome to/i, /bienvenid/i, /solu[çc][õo]es
   /de ponta/i, /cutting[- ]edge/i, /state[- ]of[- ]the[- ]art/i, /revolucion/i, /revolutioniz/i, /powered by ai/i, /com (o poder d[ae] )?(ia|intelig[êe]ncia artificial)\b/i, /ai[- ]powered/i, /impulsad[oa] por ia/i,
   /excel[êe]ncia/i, /qualidade e (confian|tradi)/i, /sua empresa (mais|no)/i, /unlock|desbloqueie|supercharge|eleve (o|seu)/i, /lorem ipsum/i];
 const BOTAO_VAGO = /^(saiba mais|saber mais|clique aqui|enviar|envie|submit|send|learn more|read more|click here|leia mais|ver mais|veja mais|continuar|ok|começar|comece|get started|start|más información|enviar mensaje|contato|contact|contacto|fale conosco|contact us)[\s!.→›»]*$/i;
+const PRIMEIRA_PESSOA = /^(somos|n[óo]s\b|nossa?s?\b|a nossa|o nosso|h[áa] (mais de )?\d+ anos|desde \d{4}|we are|we're|our\b|since \d{4}|nuestr[oa]s?\b)/i;
 const SEGUNDA_PESSOA = /\b(voc[êe]s?|seus?|suas?|teus?|tuas?|te\b|your?|you'?re|tu\b|tus?\b|usted|su\b|sus\b)/i;
 
 async function cores(browser, png, destaque) { // divisão do espaço na página inteira (reduzida), sem dependência de imagem
@@ -90,11 +108,16 @@ const hexRgb = h => ({ r: parseInt(h.slice(1, 3), 16), g: parseInt(h.slice(3, 5)
 async function abrir(browser, url, tela, reduzir) {
   const ctx = await browser.newContext({ viewport: { width: tela.width, height: tela.height }, isMobile: !!tela.isMobile, hasTouch: !!tela.hasTouch,
     deviceScaleFactor: tela.deviceScaleFactor || 1, reducedMotion: reduzir ? 'reduce' : 'no-preference' });
-  const page = await ctx.newPage(); await page.addInitScript(MEDIR);
+  const page = await ctx.newPage(); if (CTA) await page.addInitScript(sel => { window.__sqvCta = sel; }, CTA); await page.addInitScript(MEDIR);
+  page.on('response', r => { if (r.status() === 404) naoCarregou.add(r.url().replace(/^https?:\/\/127\.0\.0\.1:\d+/, '')); });
   try { await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 }); }
   catch (err) { // site lento: segue se já chegou alguma página; senão, erro claro
     const temCorpo = await page.evaluate(() => !!document.body && document.body.innerText.length > 50).catch(() => false);
-    if (!temCorpo) throw new Error('a página não abriu em 45 s (' + url + '). Confira o endereço ou tente de novo.');
+    if (!temCorpo) {
+      const m = String(err && err.message || err).split('\n')[0];
+      const motivo = /ERR_NAME_NOT_RESOLVED|ENOTFOUND/.test(m) ? 'esse endereço não existe (o domínio não foi encontrado)' : /ERR_CONNECTION|ECONNREFUSED/.test(m) ? 'o servidor recusou a conexão' : /ERR_CERT/.test(m) ? 'o certificado de segurança do site está com problema' : /Timeout/.test(m) ? 'o site não respondeu em 45 s' : m;
+      throw new Error('a página não abriu: ' + motivo + ' (' + (ehUrl ? alvo : url) + ').');
+    }
   }
   await page.evaluate(() => !!window.__sqv).then(ok => ok || page.evaluate(MEDIR));
   return { ctx, page };
@@ -157,21 +180,26 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
 
   // 1
   let p = padrao(1, 'Teste do espelho', 'A primeira tela diz para quem é, o que a pessoa ganha e o que fazer agora.');
-  const e = d.espelho; p.medidas = { titulo: e.titulo, subtitulo: e.subtitulo, botao: e.cta, 'botão na 1ª tela (desktop)': e.ctaNaTela1, 'botão na 1ª tela (celular)': c.espelho.ctaNaTela1 };
+  const e = d.espelho; p.medidas = { titulo: e.titulo, subtitulo: e.subtitulo, 'botão principal': e.cta === null ? null : (e.cta || '(sem texto)') + '  [' + e.ctaSel + ', escolhido por: ' + e.ctaPor + ']', 'botão na 1ª tela (desktop)': e.ctaNaTela1, 'botão na 1ª tela (celular)': c.espelho.ctaNaTela1, 'outros botões cheios na 1ª tela': e.outrosTela1 };
   if (!e.titulo || !e.tituloNaTela1) falha(p, 'Não há título na primeira tela.', 'Ponha um título (h1) na primeira tela com o resultado que o visitante leva.');
   else {
     const g = GENERICO.find(r => r.test(e.titulo));
-    if (g) falha(p, `Título genérico: "${e.titulo}" serve para qualquer empresa (casou com ${g}).`, 'Reescreva o título com o resultado para UMA pessoa: em vez do recurso ("agendamento com IA"), o que ela ganha ("encha sua agenda sem responder mensagem").');
+    if (g) falha(p, `Título genérico: "${e.titulo}" serve para qualquer empresa (o trecho "${g.exec(e.titulo)[0]}" não diz nada sobre o cliente).`, 'Reescreva o título com o resultado para UMA pessoa: em vez do recurso ("agendamento com IA"), o que ela ganha ("encha sua agenda sem responder mensagem").');
     const palavras = e.titulo.split(/\s+/).length;
     if (palavras > 16) falha(p, `Título com ${palavras} palavras: ninguém lê isso em 3 segundos.`, 'Corte o título para até 12 palavras; o resto vai para o subtítulo.');
+    if (!g && PRIMEIRA_PESSOA.test(e.titulo)) p.avisos.push(`O título fala da empresa ("${PRIMEIRA_PESSOA.exec(e.titulo)[0].trim()}…"), não do visitante: confira se ele diz o que a pessoa ganha.`);
     if (!g && !SEGUNDA_PESSOA.test(e.titulo + ' ' + e.subtitulo)) p.avisos.push('Título e subtítulo não falam com "você/seu": confira se o visitante certo se reconhece.');
   }
-  if (!e.cta) falha(p, 'Não achei um botão de ação (com cor de fundo própria) na página.', 'Crie UM botão principal com o que acontece ao clicar ("Agende sua avaliação grátis") e marque-o com data-cta.');
+  const comoTrocar = ' Se o botão principal é outro, marque o certo com o atributo data-cta (ou rode com --cta "seletor").';
+  if (e.cta === null) falha(p, 'Não achei um botão de ação (com cor de fundo própria) na página.', 'Crie UM botão principal com o que acontece ao clicar ("Agende sua avaliação grátis") e marque-o com data-cta.');
+  else if (!e.cta) falha(p, `O botão que mais chama atenção (${e.ctaSel}) não tem texto: é um ícone.` + comoTrocar, 'Dê à ação principal um botão com texto ("Pedir pelo WhatsApp", "Ver horários livres") na primeira tela.');
   else {
     if (!e.ctaNaTela1) falha(p, `O botão principal ("${e.cta}") não aparece na primeira tela do computador.`, 'Suba o botão principal para a primeira tela, logo abaixo do título.');
     if (!c.espelho.ctaNaTela1) falha(p, 'No celular, o botão principal não aparece na primeira tela.', 'No celular (390 px), encurte o que vem antes para o botão caber na primeira tela.');
     if (BOTAO_VAGO.test(e.cta)) falha(p, `O botão diz "${e.cta}": não conta o que acontece depois do clique.`, 'Troque o texto do botão pela ação e pelo ganho: "Ver horários livres", "Calcular meu orçamento".');
-    if (e.concorrentes.length) falha(p, `Há outro botão forte disputando a primeira tela: ${e.concorrentes.map(x => '"' + x + '"').join(', ')}.`, 'Deixe UMA ação principal na primeira tela; a segunda vira link de texto.');
+    const vagos = e.outrosTela1.filter(t => BOTAO_VAGO.test(t));
+    if (vagos.length) falha(p, `Outro botão da primeira tela diz ${vagos.map(x => '"' + x + '"').join(', ')}: não conta o que acontece depois do clique.`, 'Todo botão da primeira tela diz a ação; o que não for a ação principal vira link de texto.');
+    if (e.concorrentes.length) falha(p, `Há outro botão forte, de outra cor, disputando a primeira tela com "${e.cta}": ${e.concorrentes.map(x => '"' + x + '"').join(', ')}.` + comoTrocar, 'Deixe UMA ação principal na primeira tela; a segunda vira link de texto.');
   }
   p.revisar = ['Para quem é? (o visitante certo se reconhece no título?)', 'O que eu ganho? (é resultado, não recurso?)', 'O que eu faço agora? (um botão, uma ação?)'];
 
@@ -180,13 +208,13 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
   const mk = d.marca;
   if (mk.semCta) falha(p, 'Sem botão principal não há cor de destaque para medir.', 'Resolva o padrão 1 primeiro (um botão principal).');
   else {
-    p.medidas = { 'cor de destaque (a do botão)': mk.destaque, 'contraste do botão com o fundo': mk.contrasteBotao, 'usos fora de clique': mk.foraDoClique, 'por tipo': mk.porTipo,
-      'fundo': d.cores.fundo.cor + ' ' + d.cores.fundo.pct + '%', 'segunda cor': d.cores.segunda ? d.cores.segunda.cor + ' ' + d.cores.segunda.pct + '%' : '-', 'destaque na página': d.cores.destaquePct + '%' };
+    p.medidas = { 'cor de destaque (a do botão)': mk.destaque, 'contraste do botão com o fundo': mk.contrasteBotao, 'usos fora de clique': mk.destaqueColorido ? mk.foraDoClique : 'não medido (botão neutro)', 'por tipo': mk.destaqueColorido ? mk.porTipo : {}, 'onde': mk.destaqueColorido ? mk.exemplos : [],
+      'fundo': d.cores.fundo.cor + ' ' + d.cores.fundo.pct + '%', 'segunda cor': d.cores.segunda ? d.cores.segunda.cor + ' ' + d.cores.segunda.pct + '%' : '-', 'destaque na página': mk.destaqueColorido ? d.cores.destaquePct + '%' : 'não medido (botão neutro)' };
     if (!mk.separa) falha(p, `O botão quase não se separa do fundo em volta (contraste ${mk.contrasteBotao}:1 e matiz parecido).`, 'Escolha para o botão uma cor que contraste pelo menos 3:1 com o fundo em volta, ou uma cor viva de matiz oposto ao do fundo.');
     if (!mk.destaqueColorido) p.avisos.push('O botão principal é neutro (preto, branco ou cinza): não dá para medir onde mais a cor aparece. Funciona se nada na tela tiver o mesmo peso; uma cor viva só dele costuma render mais.');
     if (mk.destaqueColorido && mk.foraDoClique > 2) falha(p, `A cor do botão (${mk.destaque}) aparece em ${mk.foraDoClique} lugares que não são clique (${Object.entries(mk.porTipo).map(([k, v]) => v + ' ' + k).join(', ')}). Veja desktop-marca-texto.png.`,
       `Tire a cor ${mk.destaque} de títulos, ícones, bordas e fundos: ela fica só em botões e links. O resto usa a cor de texto e a cor de estrutura.`);
-    if (d.cores.destaquePct > 15) falha(p, `A cor de destaque ocupa ${d.cores.destaquePct}% da página (a regra 60/30/10 pede perto de 10%).`, 'Reduza a área pintada com a cor de destaque: 60% fundo, 30% estrutura (texto, menu, cartões), 10% destaque.');
+    if (mk.destaqueColorido && d.cores.destaquePct > 15) falha(p, `A cor de destaque ocupa ${d.cores.destaquePct}% da página (a regra 60/30/10 pede perto de 10%).`, 'Reduza a área pintada com a cor de destaque: 60% fundo, 30% estrutura (texto, menu, cartões), 10% destaque.');
     if (d.cores.fundo.pct < 40) p.avisos.push(`A cor de fundo ocupa só ${d.cores.fundo.pct}% da página: muitas cores brigando (a regra pede perto de 60%).`);
   }
 
@@ -195,7 +223,8 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
   const k = d.camadas; p.medidas = { 'fundo da 1ª tela': k.fundoTela1 || 'cor lisa', 'seções': k.secoes, 'peças que atravessam a borda de uma seção': k.atravessamBorda, 'elementos com sombra': k.sombras, 'caixas': k.caixas, 'botão (ou o cartão dele) com sombra': k.ctaSombra };
   if (!k.fundoTela1) falha(p, 'A primeira tela é uma caixa de cor lisa: não há foto, forma nem degradê atrás do texto.', 'Ponha algo real no fundo da primeira tela: foto do trabalho ou do produto, ou uma forma suave.');
   if (k.secoes >= 2 && !k.atravessamBorda) falha(p, 'Nenhuma peça atravessa a borda de uma seção: a página é uma pilha de caixas.', 'Deixe UMA peça (cartão ou imagem) entrar pela metade na seção de baixo (margem negativa ou translateY).');
-  if (!k.sombras) falha(p, 'Nenhum elemento tem sombra: tudo está no mesmo plano.', 'Dê sombra suave só ao que importa: o botão principal ou o cartão principal.');
+  if (!k.sombras && k.fundoTela1 && k.atravessamBorda) p.avisos.push('Nenhum elemento tem sombra. O fundo e a peça que atravessa a borda já dão camadas; uma sombra suave no botão principal o poria na frente.');
+  else if (!k.sombras) falha(p, 'Nenhum elemento tem sombra: tudo está no mesmo plano.', 'Dê sombra suave só ao que importa: o botão principal ou o cartão principal.');
   else if (k.sombras > Math.max(6, k.caixas * .5)) falha(p, `${k.sombras} elementos com sombra: se tudo flutua, nada está na frente.`, 'Tire a sombra dos cartões comuns e deixe só no botão principal e em um cartão.');
   else if (!k.ctaSombra) p.avisos.push('O botão principal não tem sombra (nem o cartão onde ele está): é ele que deveria estar na frente.');
 
@@ -206,8 +235,10 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
   const redMov = Math.max(...[d, c].map(t => Math.max(...t.reduzido.movimento.map(x => Math.max(x.entrada.length, x.repouso.length)))));
   p.medidas = { 'título pronto em 0,4 s (desktop / celular)': d.pronto.titulo + ' / ' + c.pronto.titulo, 'botão pronto em 0,4 s (desktop / celular)': d.pronto.botao + ' / ' + c.pronto.botao,
     'máximo de coisas se movendo numa tela': pior.n + (pior.n ? ' (tela ' + pior.tela + ': ' + pior.quem.slice(0, 5).join(', ') + ')' : ''), 'movendo com "reduzir movimento" ligado': redMov };
-  if (d.pronto.titulo === false || c.pronto.titulo === false) falha(p, `O título não está legível 0,4 s depois de a página abrir (opacidade ${d.pronto.opTitulo}): o visitante espera a animação.`, 'Título, texto e botão da primeira tela aparecem prontos, sem fade nem entrada. Animação de entrada só da segunda tela para baixo.');
-  if (d.pronto.botao === false || c.pronto.botao === false) falha(p, 'O botão principal não está visível 0,4 s depois de a página abrir.', 'O botão da primeira tela aparece pronto, sem animação de entrada.');
+  const onde = (a, b) => a === false && b === false ? 'no computador e no celular' : a === false ? 'no computador' : 'no celular';
+  const tp = d.pronto.titulo === false ? d.pronto : c.pronto;
+  if (d.pronto.titulo === false || c.pronto.titulo === false) falha(p, `O título não está legível 0,4 s depois de a página abrir, ${onde(d.pronto.titulo, c.pronto.titulo)} (${tp.tituloNaTela === false ? 'ele ainda está fora da tela' : 'opacidade ' + tp.opTitulo}): o visitante espera a animação.`, 'Título, texto e botão da primeira tela aparecem prontos, sem fade nem entrada. Animação de entrada só da segunda tela para baixo.');
+  if (d.pronto.botao === false || c.pronto.botao === false) falha(p, `O botão principal não está visível 0,4 s depois de a página abrir, ${onde(d.pronto.botao, c.pronto.botao)}.`, 'O botão da primeira tela aparece pronto, sem animação de entrada.');
   if (pior.n > 3) falha(p, `${pior.n} coisas se movem ao mesmo tempo na tela ${pior.tela} (${pior.quem.slice(0, 5).join(', ')}).`, 'Escolha UMA coisa para se mover por tela (o produto, o resultado, o antes e depois) e deixe o resto parado.');
   else if (pior.n > 1) p.avisos.push(`${pior.n} coisas se movem na tela ${pior.tela}; a regra é uma por tela.`);
   if (redMov > 0) falha(p, `Com "reduzir movimento" ligado no aparelho, ${redMov} elemento(s) continuam se movendo.`, 'Respeite prefers-reduced-motion: dentro de @media (prefers-reduced-motion: reduce), desligue animation e transition; no JS, confira matchMedia antes de animar.');
@@ -218,17 +249,20 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
   const a = d.amostra; p.medidas = { 'ferramenta encontrada': a.encontrada ? a.onde : 'não', 'responde na hora': !!a.reage, 'passos até o fim': a.passos || 0, 'campos': a.campos || 0, 'formulário de contato': a.soContato };
   if (!a.encontrada) falha(p, a.soContato ? 'A página explica e entrega um formulário de contato: não há nada para o visitante experimentar.' : 'Não há ferramenta para o visitante experimentar (quiz, calculadora, simulador).',
     'Ache a pergunta que todo cliente faz antes de comprar ("quanto custa?", "qual serve para mim?") e responda com uma amostra: copie amostras/amostra.js e use <amostra-calculadora> ou <amostra-quiz>.');
-  else if (!a.reage) falha(p, `Achei uma ferramenta (${a.onde}), mas ela não muda nada na tela quando alguém mexe.`, 'A amostra tem de mostrar o resultado na própria página, na hora, sem pedir e-mail antes.');
+  else if (!a.reage) falha(p, `Há controles na página (${a.onde}), mas mexer neles não mostra resultado nenhum na tela: isso é formulário, não amostra. (O auditor mexe nos campos e clica, sem enviar o formulário.)`, 'A amostra tem de mostrar o resultado na própria página, na hora, sem enviar nada e sem pedir e-mail antes: use <amostra-calculadora> ou <amostra-quiz> de amostras/amostra.js.');
   else if (a.passos > 7 || a.campos > 7) falha(p, `A amostra tem ${Math.max(a.passos, a.campos)} passos: comprida demais para alguém chegar ao fim.`, 'Corte a amostra para 3 a 5 perguntas.');
 
   for (const x of P) x.passa = x.falhas.length === 0;
-  R.padroes = P; R.nota = P.filter(x => x.passa).length; R.passa = R.nota === 5;
+  R.padroes = P; R.nota = P.filter(x => x.passa).length; R.passa = R.nota === 5; R.naoCarregou = [...naoCarregou];
 
   // ---------------- saídas ----------------
   fs.writeFileSync(path.join(saida, 'relatorio.json'), JSON.stringify(R, null, 1));
   const md2 = ['# Consertar — ' + alvo, '', `Auditoria do site-que-vende: ${R.nota} de 5 padrões passam.`, '',
     'Cole este arquivo no seu agente de código (Claude Code, Codex, Cursor) junto com a página. Depois rode o auditor de novo.', ''];
   for (const x of P) if (!x.passa) { md2.push(`## ${x.n}. ${x.nome}`, '', 'Problemas medidos:', ...x.falhas.map(f => '- ' + f), '', 'O que fazer:', ...x.consertar.map(f => '- ' + f), ''); }
+  if (!mk.semCta && mk.destaqueColorido && mk.exemplos.length) md2.push('## Onde a cor do botão (' + mk.destaque + ') aparece fora de clique', '', ...mk.exemplos.map(x => '- ' + x), mk.foraDoClique > mk.exemplos.length ? `- … e mais ${mk.foraDoClique - mk.exemplos.length}` : '', '');
+  if (e.cta !== null) md2.push('## Botão tratado como principal', '', `"${e.cta || '(sem texto)'}" (${e.ctaSel}), escolhido por: ${e.ctaPor}. Se o principal é outro, marque o certo com o atributo data-cta e rode de novo.`, '');
+  if (naoCarregou.size) md2.push('## Arquivos que não carregaram (404)', '', ...[...naoCarregou].slice(0, 10).map(x => '- ' + x), '');
   md2.push('## Revisão humana (o auditor não julga texto)', '', `Título: "${e.titulo || ''}"`, `Subtítulo: "${e.subtitulo || ''}"`, `Botão: "${e.cta || ''}"`, '', ...P[0].revisar.map(q => '- ' + q), '',
     'Regras ao consertar: não invente depoimento, número nem cliente; não mude o que já passa; mantenha o texto do dono quando ele responder às três perguntas.');
   fs.writeFileSync(path.join(saida, 'consertar.md'), md2.join('\n') + '\n');
@@ -257,7 +291,12 @@ ${x.revisar ? '<b>Para você responder (o auditor não julga texto)</b><ul>' + x
       for (const f of x.falhas) console.log('         - ' + f);
       for (const f of x.avisos) console.log('         · aviso: ' + f);
     }
+    if (naoCarregou.size) console.log(`\naviso: ${naoCarregou.size} arquivo(s) da página não carregaram (404): ${[...naoCarregou].slice(0, 3).join(', ')}` + (ehUrl ? '' : '\n       Página local que usa ../ fora da pasta dela? Passe --raiz <pasta que contém tudo>.'));
     console.log(`\n${R.nota} de 5 padrões passam.  Relatório: ${path.join(saida, 'relatorio.html')}` + (R.passa ? '' : `\nO que consertar (cole no seu agente): ${path.join(saida, 'consertar.md')}`) + '\n');
   }
   process.exit(R.passa ? 0 : 1);
-})().catch(err => { console.error('erro: ' + (err && err.message || err)); process.exit(2); });
+})().catch(err => {
+  const m = String(err && err.message || err);
+  console.error('erro: ' + (/context was destroyed|navigation/i.test(m) ? 'a página saiu do endereço no meio da medição (redirecionamento ou script que navega sozinho). Rode de novo; se repetir, audite o endereço final.' : m.split('\n')[0]));
+  process.exit(2);
+});

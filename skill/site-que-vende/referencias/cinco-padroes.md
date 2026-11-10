@@ -2,6 +2,8 @@
 
 Para cada padrão: a ideia, o que os testes mostraram, o que o auditor mede e como consertar.
 Os números são de testes publicados por quem os fez; onde o número vem de quem vende a ferramenta, está dito.
+A origem de cada um está no fim, em "De onde vêm os números". O celular entra nos padrões 1 e 4; os padrões 2, 3 e 5
+são medidos no computador (1440×900).
 
 ## 1. Teste do espelho (texto)
 
@@ -78,4 +80,20 @@ estimativa). Tem de ser curto para a pessoa chegar ao fim.
 **O auditor mede:** se existe uma ferramenta que não é formulário de contato; se ela muda o resultado na tela
 quando alguém mexe (ele mexe nos controles e clica); e o tamanho (falha acima de 7 passos ou campos).
 
-**Pronto para colar:** `amostras/amostra.js` traz `<amostra-calculadora>` e `<amostra-quiz>`.
+**Pronto para colar:** `amostras/amostra.js` traz `<amostra-calculadora>` e `<amostra-quiz>` (chaves em `amostras.md`).
+
+## De onde vêm os números
+
+Procure pelo nome para ler o original. Nenhum deles é medição nossa.
+
+| Número | Origem |
+|---|---|
+| 12,1% → 21,7% (79,3% melhor) | estudo de caso da agência de conversão CXL sobre a página de cadastro do site de vagas TruckersReport |
+| +90% de cliques para a página de preços | teste A/B de posicionamento da CityCliq (título "Create a webpage for your business") |
+| +31,4% de conversão repetindo a palavra buscada | teste de texto dinâmico em página de destino da Campaign Monitor |
+| Parallax: mais divertido e com cara mais profissional, sem melhora geral da experiência de uso | dissertação "The effects of parallax scrolling on user experience and preference in web design", Universidade Purdue |
+| Movimento puxa a atenção, para o bem e para o mal | artigos do Nielsen Norman Group sobre animação em interfaces |
+| Cerca de um terço dos adultos acima de 40 com disfunção do ouvido interno | pesquisa nacional de saúde dos EUA analisada pela Johns Hopkins (publicada em 2009) |
+| Efeito IKEA | Norton, Mochon e Ariely, "The IKEA effect: When labor leads to love" (2012) |
+| Calculadora de ortodontia com perto de 45% de conversão | caso divulgado pela Outgrow, a empresa que vende a ferramenta (não é estudo independente) |
+| Regra 60/30/10 | regra prática de decoração de interiores, não é estudo |

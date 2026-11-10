@@ -52,7 +52,16 @@ FALHA  2. Regra do marca-texto
 O que consertar (cole no seu agente): auditoria/consertar.md
 ```
 
-Código de saída: `0` passou nos cinco, `1` algum falhou, `2` erro de uso. Serve em CI.
+Código de saída: `0` passou nos cinco, `1` algum falhou, `2` erro de uso ou a página não abriu. Serve em CI.
+
+O que saber antes de rodar:
+
+- Cada auditoria leva de 30 a 60 segundos e grava de 4 a 8 MB em `auditoria/` (fotos e relatório). Ponha `auditoria/` no `.gitignore` do site.
+- O auditor rola a página e **mexe nos controles** da amostra (sliders, opções, botões) para ver se ela responde. Ele **não envia formulário e não segue link**.
+- **Qual é o botão principal?** Ele escolhe o maior botão cheio da primeira tela e diz qual escolheu no relatório. Se escolheu errado, marque o certo no HTML com o atributo `data-cta` (`<a data-cta href="...">`), ou, em site que você não pode editar, rode com `--cta "seletor-css"`.
+- Página local que usa arquivos fora da pasta dela (`../`) e não está num repositório git: passe `--raiz <pasta que contém tudo>`. O auditor avisa quando algum arquivo deu 404.
+- Os padrões 1 e 4 são medidos no computador (1440×900) e no celular (390×844); os padrões 2, 3 e 5, no computador.
+- `node skill/site-que-vende/scripts/auditar.js --help` mostra todas as opções.
 
 ## O que tem aqui
 
@@ -64,9 +73,10 @@ Código de saída: `0` passou nos cinco, `1` algum falhou, `2` erro de uso. Serv
 | Modelo das amostras | `skill/site-que-vende/amostras/exemplo.html` | quiz e calculadora funcionando, para copiar |
 | Skill | `skill/site-que-vende/SKILL.md` | os 5 passos para o agente: brief → medir → consertar → medir → revisão humana |
 | Brief | `skill/site-que-vende/referencias/brief.md` | as perguntas antes do design e o pedido pronto para colar |
+| Chaves das amostras | `skill/site-que-vende/referencias/amostras.md` | todas as chaves do JSON do quiz e da calculadora, variáveis de cor e o evento de resultado |
 | Os 5 padrões | `skill/site-que-vende/referencias/cinco-padroes.md` | a ideia, os números dos testes e o que é medido |
 | Exemplos | `exemplos/ruim/` e `exemplos/bom/` | o mesmo negócio fictício: um falha nos 5, o outro passa nos 5 |
-| Testes | `tests/rodar.sh` | 21 verificações: o ruim falha com o motivo certo, o bom passa, as amostras funcionam |
+| Testes | `tests/rodar.sh` | 30 verificações: o ruim falha com o motivo certo, o bom passa, as amostras funcionam e 4 casos que já enganaram o auditor |
 
 ## O processo, do início ao fim (7 passos)
 
@@ -112,6 +122,7 @@ Sem agente nenhum, o auditor e as amostras funcionam sozinhos.
 ```
 
 A cor do botão vem da sua página: `:root { --amostra-destaque: #c2410c; }`. Nada é enviado a servidor nenhum.
+Todas as chaves (inclusive `multiplica`, `margem`, `moeda`, `idioma`): [`amostras.md`](skill/site-que-vende/referencias/amostras.md).
 
 ## Limites (leia antes de confiar)
 
@@ -119,7 +130,8 @@ A cor do botão vem da sua página: `:root { --amostra-destaque: #c2410c; }`. Na
 - Botão principal preto, branco ou cinza: o padrão 2 vira aviso, porque não dá para contar onde mais a cor aparece.
 - Site de marca grande costuma falhar em vários padrões e vender assim mesmo: ele já tem a confiança que o site de
   um negócio pequeno precisa conquistar na primeira tela.
-- Passar nos cinco não garante venda. Garante que o site não perde cliente pelos cinco motivos mais comuns.
+- Passar nos cinco não garante venda. Tira do caminho cinco motivos comuns de um site perder cliente; o resto é oferta, preço e tráfego.
+- "Sombra", "peça atravessando a borda" e "uma coisa se move por tela" são escolhas de design deste kit. Um site chapado bem resolvido pode vender; o auditor avisa onde ele difere do padrão.
 - As mensagens do auditor estão em português. As páginas auditadas podem estar em português, inglês ou espanhol.
 
 ## Licença

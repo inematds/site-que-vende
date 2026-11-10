@@ -36,7 +36,20 @@ const r=JSON.parse(require("fs").readFileSync(process.argv[1]));const a=r.padroe
 if(!a.passa){console.log("  ERRO amostra não passou: "+a.falhas.join("; "));process.exit(1)}
 console.log("  ok   padrão 5 passa na página de amostras ("+a.medidas["ferramenta encontrada"]+", "+a.medidas["passos até o fim"]+" passo(s))")' "$T/am.json" || falhas=$((falhas+1))
 
-echo "4) uso errado"
+echo "4) casos que já enganaram o auditor"
+caso(){ $A "tests/casos/$1.html" --saida "$T/$1" > "$T/$1.txt" 2>&1; echo $?; }
+rc=$(caso dois-botoes); tem "$T/dois-botoes.txt" "disputando a primeira tela" "dois botões cheios: acusa a disputa"
+tem "$T/dois-botoes.txt" 'Outro botão da primeira tela diz "Saiba mais"' "dois botões cheios: acusa o botão vago"
+rc=$(caso cartao-irmao); grep -q "pilha de caixas" "$T/cartao-irmao.txt" && ruim "cartão entre seções: deu pilha de caixas" || ok "cartão entre duas seções conta como peça que atravessa"
+rc=$(caso form-envio); [ "$rc" -eq 1 ] && ok "formulário com envio: não navega (sai 1, não 2)" || ruim "formulário com envio: saiu $rc"
+tem "$T/form-envio.txt" "formulário, não amostra" "formulário com envio: não é contado como amostra"
+rc=$(caso botao-neutro); grep -q "ocupa" "$T/botao-neutro.txt" && ruim "botão neutro: falhou por área de cor" || ok "botão neutro: só aviso, sem falha por área"
+tem "$T/botao-neutro.txt" "botão principal é neutro" "botão neutro: aviso presente"
+$A exemplos/ruim/index.html --cta "a.botao.mais" --saida "$T/cta" > "$T/cta.txt" 2>&1
+tem "$T/cta.txt" 'O botão diz "Saiba mais"' "--cta escolhe o botão indicado"
+$A --help | grep -q -- "--cta" && ok "--help" || ruim "--help"
+
+echo "5) uso errado"
 $A > /dev/null 2>&1; [ $? -eq 2 ] && ok "sem argumento sai 2" || ruim "sem argumento deveria sair 2"
 $A nao-existe.html > /dev/null 2>&1; [ $? -eq 2 ] && ok "arquivo inexistente sai 2" || ruim "arquivo inexistente deveria sair 2"
 

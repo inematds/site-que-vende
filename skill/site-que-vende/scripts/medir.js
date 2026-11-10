@@ -52,6 +52,15 @@
   const temTextoProprio = el => [...el.childNodes].some(n => n.nodeType === 3 && n.nodeValue.trim().length > 1);
   const CLICAVEL = 'a,button,[role=button],input,select,label,summary,textarea';
 
+  function seletor(el) {
+    if (!el || !el.tagName) return '';
+    const t = el.tagName.toLowerCase();
+    if (el.id) return t + '#' + el.id;
+    const c = [...el.classList].slice(0, 2).join('.');
+    return t + (c ? '.' + c : '');
+  }
+  const rotulo = el => texto(el) || el.getAttribute('title') || (el.querySelector && el.querySelector('img[alt]') ? el.querySelector('img[alt]').alt : '') || '';
+
   // ---------- botão principal (CTA) ----------
   function botoes() {
     const out = [];
@@ -61,8 +70,11 @@
       if (!f || r.height < 26 || r.height > 110 || r.width < 56 || r.width > 720) continue;
       const atras = fundoAtras(el), d = dist(f, atras); if (d < 30) continue;
       const rot = { top: r.top + scrollY, left: r.left, w: r.width, h: r.height };
-      out.push({ el, cor: f, atras, d, r: rot, texto: texto(el), marcado: el.hasAttribute('data-cta'),
-        peso: r.width * r.height * (d / 255) * (saturada(f) ? 1.6 : 1) });
+      const flutua = getComputedStyle(el).position === 'fixed' || !!el.closest('[style*="position: fixed"],[style*="position:fixed"]');
+      const txt = rotulo(el);
+      // botão flutuante sem texto (ícone de WhatsApp, chat) pesa pouco: quase nunca é a ação principal da página
+      out.push({ el, cor: f, atras, d, r: rot, texto: txt, sel: seletor(el), marcado: el.hasAttribute('data-cta') || (window.__sqvCta && el.matches(window.__sqvCta)),
+        peso: r.width * r.height * (d / 255) * (saturada(f) ? 1.6 : 1) * (!txt ? .15 : 1) * (flutua ? .5 : 1) });
     }
     return out;
   }
@@ -72,7 +84,10 @@
     const tela1 = bs.filter(b => b.r.top + b.r.h <= VH() + 2);
     const lista = marc.length ? marc : tela1.length ? tela1 : bs;
     const b = lista.reduce((a, x) => x.peso > a.peso ? x : a);
-    return Object.assign({}, b, { naTela1: b.r.top + b.r.h <= VH() + 2, concorrentes: tela1.filter(x => x !== b && x.texto !== b.texto && dist(x.cor, b.cor) > 40 && x.peso > b.peso * .5).map(x => x.texto) });
+    // outros botões cheios na 1ª tela, com outro texto: disputam a atenção (cor diferente pesa mais; mesma cor também conta se for grande)
+    const outros = tela1.filter(x => x !== b && x.texto && x.texto !== b.texto && x.peso > b.peso * .3 && !x.el.closest('nav,header nav'));
+    return Object.assign({}, b, { naTela1: b.r.top + b.r.h <= VH() + 2, escolhidoPor: marc.length ? 'data-cta' : 'maior botão cheio da 1ª tela',
+      concorrentes: outros.filter(x => dist(x.cor, b.cor) > 40).map(x => x.texto), outrosTela1: outros.map(x => x.texto) });
   }
   function titulo() {
     let h = [...document.querySelectorAll('h1')].find(visivel);
@@ -103,7 +118,8 @@
     const hr = h && h.getBoundingClientRect();
     return {
       titulo: h ? texto(h) : null, tituloNaTela1: !!h && hr.top + scrollY < VH() - 20,
-      subtitulo: subtitulo(h), cta: c ? c.texto : null, ctaNaTela1: !!c && c.naTela1, concorrentes: c ? c.concorrentes : [],
+      subtitulo: subtitulo(h), cta: c ? c.texto : null, ctaSel: c ? c.sel : null, ctaPor: c ? c.escolhidoPor : null, ctaNaTela1: !!c && c.naTela1,
+      concorrentes: c ? c.concorrentes : [], outrosTela1: c ? c.outrosTela1 : [],
       imagensTela1: [...document.images].filter(i => visivel(i) && i.getBoundingClientRect().top < VH()).map(i => i.alt || i.currentSrc.split('/').pop()).slice(0, 6),
     };
   }
@@ -128,15 +144,15 @@
       const raiz = svg ? (el.closest('svg') || el) : el;
       if (raiz.closest(CLICAVEL)) { cliques.push(raiz); continue; }
       if (usos.some(u => u.el === raiz)) continue;
-      usos.push({ el: raiz, tipo, texto: texto(raiz).slice(0, 40) });
+      usos.push({ el: raiz, tipo, texto: texto(raiz).slice(0, 40), sel: seletor(raiz) });
     }
     if (pintar) for (const u of usos) { u.el.style.outline = '3px dashed #ff00c8'; u.el.style.outlineOffset = '2px'; }
     const porTipo = {}; for (const u of usos) porTipo[u.tipo] = (porTipo[u.tipo] || 0) + 1;
     // o botão "se separa" do fundo por claro/escuro (3:1) ou por ser a única cor viva num fundo neutro ou de matiz oposto
     const ct = contraste(alvo, c.atras), dh = Math.abs(hsl(alvo).h - hsl(c.atras).h), matiz = Math.min(dh, 360 - dh);
-    const separa = ct >= 3 || (saturada(alvo) && ct >= 1.5 && (!saturada(c.atras) || matiz >= 60));
+    const separa = ct >= 3 || (saturada(alvo) && ct >= 1.2 && (!saturada(c.atras) || matiz >= 60));
     return { destaque: hex(alvo), destaqueColorido: saturada(alvo), contrasteBotao: +ct.toFixed(2), separa,
-      foraDoClique: usos.length, porTipo, exemplos: usos.slice(0, 8).map(u => u.tipo + (u.texto ? ': "' + u.texto + '"' : '')), noClique: new Set(cliques).size };
+      foraDoClique: usos.length, porTipo, exemplos: usos.slice(0, 12).map(u => u.tipo + ' em ' + u.sel + (u.texto ? ' ("' + u.texto + '")' : '')), noClique: new Set(cliques).size };
   }
 
   // ---------- 3. frente, meio, fundo ----------
@@ -165,6 +181,12 @@
       const r = el.getBoundingClientRect(), t = r.top + scrollY, b = r.bottom + scrollY;
       if (r.width < 80 || r.height < 60 || r.height > VH() * 1.6) continue;
       if (limites.some(l => t < l - 20 && b > l + 20) && !cruzam.some(x => x.contains(el) || el.contains(x))) cruzam.push(el);
+    }
+    // peça que É filha direta do contêiner e invade a vizinha (cartão com margem negativa entre duas seções)
+    const rs = lista.map(e => { const r = e.getBoundingClientRect(); return { e, t: r.top + scrollY, b: r.bottom + scrollY }; });
+    for (let i = 0; i < rs.length; i++) for (let k = 0; k < rs.length; k++) {
+      if (i === k) continue; const inv = Math.min(rs[i].b, rs[k].b) - Math.max(rs[i].t, rs[k].t);
+      if (inv >= 20 && inv < (rs[i].b - rs[i].t) - 20 && (rs[i].b - rs[i].t) <= (rs[k].b - rs[k].t) && !cruzam.includes(rs[i].e)) cruzam.push(rs[i].e);
     }
     let sombras = 0, caixas = 0; const c = cta(); let ctaSombra = false;
     for (const el of document.body.querySelectorAll('*')) {
@@ -202,7 +224,7 @@
   }
   function textoPronto() {
     const h = titulo(), c = cta(); const ok = el => !!el && opacidade(el) >= .9 && naTela(el.getBoundingClientRect());
-    return { titulo: h ? ok(h) : null, botao: c && c.naTela1 ? ok(c.el) : null, opTitulo: h ? +opacidade(h).toFixed(2) : null };
+    return { titulo: h ? ok(h) : null, botao: c && c.naTela1 ? ok(c.el) : null, opTitulo: h ? +opacidade(h).toFixed(2) : null, tituloNaTela: h ? naTela(h.getBoundingClientRect()) : null };
   }
 
   // ---------- 5. amostra grátis ----------
@@ -226,6 +248,13 @@
     });
   }
   async function amostra() {
+    // sondagem segura: nenhum envio de formulário e nenhum link sai da página enquanto o auditor mexe nos controles
+    const trava = e => e.preventDefault();
+    const travaLink = e => { const a = e.target.closest && e.target.closest('a[href]'); if (a && !(a.getAttribute('href') || '').startsWith('#')) e.preventDefault(); };
+    window.addEventListener('submit', trava, true); window.addEventListener('click', travaLink, true);
+    try { return await sondar(); } finally { window.removeEventListener('submit', trava, true); window.removeEventListener('click', travaLink, true); }
+  }
+  async function sondar() {
     const rec = recipientesAmostra();
     const soContato = !!document.querySelector('form input[type=email],form input[type=tel],form textarea');
     let melhor = null;
@@ -239,7 +268,7 @@
         }
         for (const el of c.querySelectorAll('select')) { if (el.options.length > 1) { el.selectedIndex = Math.min(el.options.length - 1, 1 + (i % 2)); el.dispatchEvent(new Event('change', { bubbles: true })); el.dispatchEvent(new Event('input', { bubbles: true })); } }
         const r = [...c.querySelectorAll('input[type=radio],input[type=checkbox]')].find(e => visivel(e) || visivel(e.parentElement)); if (r && !r.checked) r.click();
-        const b = [...c.querySelectorAll('button,[role=button],[role=radio]')].find(e => visivel(e) && !e.disabled && e.type !== 'reset' && !/voltar|refazer|de novo|back|again|start over|volver|otra vez|de nuevo/i.test(texto(e)));
+        const b = [...c.querySelectorAll('button,[role=button],[role=radio]')].find(e => visivel(e) && !e.disabled && e.type !== 'reset' && !(e.tagName === 'A' && !(e.getAttribute('href') || '#').startsWith('#')) && !/voltar|refazer|de novo|back|again|start over|volver|otra vez|de nuevo/i.test(texto(e)));
         if (b) b.click(); else if (i > 0) break; // sem botão de avançar = ferramenta de um passo só
         await new Promise(res => setTimeout(res, 260));
         const depois = texto(c); if (depois === antes) break; passos++; antes = depois;
