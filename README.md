@@ -66,7 +66,7 @@ Código de saída: `0` passou nos cinco, `1` algum falhou, `2` erro de uso. Serv
 | Brief | `skill/site-que-vende/referencias/brief.md` | as perguntas antes do design e o pedido pronto para colar |
 | Os 5 padrões | `skill/site-que-vende/referencias/cinco-padroes.md` | a ideia, os números dos testes e o que é medido |
 | Exemplos | `exemplos/ruim/` e `exemplos/bom/` | o mesmo negócio fictício: um falha nos 5, o outro passa nos 5 |
-| Testes | `tests/rodar.sh` | 22 verificações: o ruim falha com o motivo certo, o bom passa, as amostras funcionam |
+| Testes | `tests/rodar.sh` | 21 verificações: o ruim falha com o motivo certo, o bom passa, as amostras funcionam |
 
 ## O processo, do início ao fim (7 passos)
 

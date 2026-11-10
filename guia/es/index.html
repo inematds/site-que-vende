@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>site-que-vende: los 5 patrones que se miden en tu página</title>
+<meta name="description" content="Kit gratuito de INEMA que mide en el navegador los 5 patrones del sitio que atrae clientes y te entrega una lista de correcciones lista para pegar en tu agente.">
+<link rel="alternate" hreflang="pt-BR" href="https://inematds.github.io/site-que-vende/guia/">
+<link rel="alternate" hreflang="en" href="https://inematds.github.io/site-que-vende/guia/en/">
+<link rel="alternate" hreflang="es" href="https://inematds.github.io/site-que-vende/guia/es/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0c10; --bg2:#14141b; --card:#16161e; --line:#272730;
+    --txt:#e9e9ee; --mut:#9a9aa6; --amb:#FACC15; --amb2:#f0c070; --sky:#38bdf8; --pro:#cbd5e1;
+    --ok:#7ce0c6; --bad:#f0918a;
+    color-scheme:dark;
+  }
+  body.light{
+    --bg:#f6f7f9; --bg2:#eceef2; --card:#ffffff; --line:#e1e3ea;
+    --txt:#1a1a22; --mut:#5b5b68; --amb:#a16207; --amb2:#a16207; --sky:#0369a1; --pro:#b45309;
+    --ok:#0e6b55; --bad:#a83426;
+    color-scheme:light;
+  }
+  body.light .hero .glow{opacity:.5}
+  body.light pre{background:#0e0e14;color:#d6d6e0}
+  body.light pre .c{color:#8a8a98}
+  body.light .btn{background:#FACC15}
+  body.light .step .b{background:#FACC15}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:Sora,sans-serif;line-height:1.15;margin:0}
+  a{color:var(--amb);text-decoration:none}
+  code,pre{font-family:"JetBrains Mono",monospace}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 22px}
+  .mut{color:var(--mut)} .amb{color:var(--amb)}
+  .chip{display:inline-block;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amb);font-weight:600;font-family:Sora}
+  nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(12px);background:rgba(12,12,16,.78);border-bottom:1px solid var(--line)}
+  body.light nav{background:rgba(246,247,249,.85)}
+  nav .wrap{display:flex;align-items:center;gap:20px;height:60px}
+  nav .brand{display:flex;align-items:center;gap:8px;font-family:Sora;font-weight:800;letter-spacing:-.02em;color:var(--amb);white-space:nowrap}
+  nav .brand .emoji{font-size:1.25rem}
+  nav .sep{color:var(--mut);opacity:.45}
+  nav .inema{color:var(--sky);font-weight:600;font-size:.88rem;font-family:Sora}
+  nav .inema:hover{filter:brightness(1.15)}
+  nav .pro{color:var(--pro);font-weight:600;font-size:.88rem;font-family:Sora}
+  nav .pro:hover{filter:brightness(1.15)}
+  nav .clubpro{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  nav .links{margin-left:auto;display:flex;align-items:center;gap:16px;font-size:.9rem;white-space:nowrap}
+  nav .links a.sec{color:var(--mut)} nav .links a.sec:hover{color:var(--txt)}
+  .lang{display:inline-flex;gap:2px;font-family:Sora;font-size:.78rem}
+  .lang a{color:var(--mut);padding:.2em .45em;border-radius:6px} .lang a.on{color:var(--amb);background:rgba(250,204,21,.12)}
+  .tgl{background:var(--bg2);border:1px solid var(--line);color:var(--txt);width:38px;height:38px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem}
+  .tgl:hover{border-color:var(--amb)}
+  .btn{display:inline-block;background:var(--amb);color:#1a1206;font-weight:600;padding:.6em 1.05em;border-radius:10px;font-family:Sora}
+  .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  @media(max-width:1180px){nav .links a.sec{display:none}}
+  @media(max-width:520px){nav .wrap{gap:8px;padding:8px 14px;height:auto;flex-wrap:wrap} nav .links{gap:8px;margin-left:0;width:100%;justify-content:space-between} nav .btn{padding:.45em .7em;font-size:.82rem} .tgl{width:34px;height:34px}}
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  .hero .glow{position:absolute;inset:-40% -20% auto auto;width:70%;height:600px;background:radial-gradient(closest-side,rgba(250,204,21,.18),transparent 70%);pointer-events:none}
+  .hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:74px 22px}
+  .hero h1{font-size:clamp(2.1rem,4.6vw,3.3rem);font-weight:800;letter-spacing:-.025em}
+  .hero p.lead{font-size:1.18rem;color:var(--mut);margin:1.1em 0 1.6em;max-width:38ch}
+  .hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .hero figure{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px -30px #000}
+  .hero figure img{width:100%;height:auto;display:block}
+  .resumo{padding:38px 0 34px;border-bottom:1px solid var(--line)}
+  .resumo p{font-size:1.12rem;line-height:1.7;max-width:74ch;margin:.55em 0 0}
+  @media(max-width:780px){.hero .wrap{grid-template-columns:1fr;padding:48px 22px}}
+  section{padding:62px 0;border-bottom:1px solid var(--line)}
+  section h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800;letter-spacing:-.02em}
+  section .sub{color:var(--mut);margin:.6em 0 2em;max-width:62ch}
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:820px){.g3,.g4{grid-template-columns:1fr 1fr}}
+  @media(max-width:540px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h3{font-size:1.05rem;margin-bottom:.4em}
+  .card p{color:var(--mut);font-size:.92rem;margin:0}
+  .card ul{color:var(--mut);font-size:.92rem;margin:.4em 0 0;padding-left:1.1em}
+  .card li{margin:.25em 0}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 26px}
+  .flow span{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:.45em .9em;font-size:.85rem;font-family:Sora;font-weight:600}
+  .flow .arr{color:var(--amb);border:none;background:none;padding:0 .1em}
+  pre{background:#0a0a0e;border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow:auto;font-size:.86rem;line-height:1.6;color:#d6d6e0;white-space:pre-wrap;overflow-wrap:anywhere;margin:.6em 0}
+  pre .c{color:#8a8a98} pre .k{color:var(--amb2)} pre .s{color:#9ece6a}
+  .step{display:grid;grid-template-columns:46px minmax(0,1fr);gap:16px;margin-bottom:26px}
+  .step>div,.card,.pad>div{min-width:0}
+  p code,li code,td code{overflow-wrap:anywhere}
+  .step .b{width:46px;height:46px;border-radius:12px;background:var(--amb);color:#1a1206;font-family:Sora;font-weight:800;font-size:1.25rem;display:flex;align-items:center;justify-content:center}
+  .step h3{font-size:1.12rem;margin-bottom:.3em}
+  .step p{color:var(--mut);margin:.2em 0 .7em}
+  .tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+  .tbl th,.tbl td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  .tbl tr:last-child td{border-bottom:0}
+  .tbl th{font-family:Sora;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+  .note{border-left:3px solid var(--amb);background:var(--bg2);padding:14px 16px;border-radius:0 12px 12px 0;color:var(--txt);font-size:.95rem;margin-top:22px}
+  body.light .note{border-left-color:#EAB308;background:#FEF9C3}
+  .note a,.src a{text-decoration:underline}
+  body.light a{color:#854d0e}
+  body.light .btn{color:#1a1206}
+  body.light nav .inema{color:var(--sky)} body.light nav .pro{color:var(--pro)}
+  body.light .lang a{color:var(--mut)} body.light .lang a.on{color:#854d0e}
+  body.light nav .links a.sec{color:var(--mut)}
+  body.light .note a, body.light .src a{text-decoration-color:#FACC15;text-decoration-thickness:3px}
+  .src{font-size:.88rem;color:var(--mut);margin-top:12px}
+  .bad{color:var(--bad);font-family:Sora;font-weight:600}
+  .ok{color:var(--ok);font-family:Sora;font-weight:600}
+  .pad{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px 34px}
+  .pad .head{grid-column:1/-1;display:flex;gap:14px;align-items:center;margin-bottom:6px}
+  .pad .head .n{flex:0 0 46px;width:46px;height:46px;border-radius:12px;background:rgba(250,204,21,.14);color:var(--amb);font-family:Sora;font-weight:800;font-size:1.3rem;display:flex;align-items:center;justify-content:center}
+  body.light .pad .head .n{background:#FEF9C3;color:#1a1a22}
+  .pad .head h3{font-size:1.25rem}
+  .pad .head p{margin:.2em 0 0;color:var(--mut);font-size:.95rem}
+  .pad h4{font-family:Sora;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:14px 0 6px}
+  .pad p,.pad li{font-size:.95rem}
+  .pad p{margin:0 0 .6em}
+  .pad ul{margin:0;padding-left:1.15em}
+  .pad li{margin:.3em 0}
+  @media(max-width:820px){.pad{grid-template-columns:1fr}}
+  .bigs{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 4px}
+  .big{flex:1 1 130px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .big b{display:block;font-family:Sora;font-weight:800;font-size:1.55rem;line-height:1.1;color:var(--txt)}
+  .big span{display:block;font-size:.84rem;color:var(--mut);margin-top:4px;line-height:1.4}
+  .bars{margin:10px 0 4px}
+  .bars div{display:flex;align-items:center;gap:10px;font-size:.88rem;color:var(--mut);margin:6px 0}
+  .bars i{display:block;height:16px;border-radius:4px;background:var(--mut);opacity:.55}
+  .bars i.on{background:var(--amb);opacity:1}
+  body.light .bars i.on{background:#FACC15}
+  .bars b{font-family:Sora;color:var(--txt);white-space:nowrap}
+  .ex{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:680px){.ex{grid-template-columns:1fr}}
+  figure.shot{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--card)}
+  figure.shot img{width:100%;height:auto;display:block}
+  figure.shot figcaption{padding:12px 14px;font-size:.9rem;color:var(--mut)}
+  figure.shot figcaption strong{color:var(--txt)}
+  .demo{--amostra-fundo:var(--card);--amostra-texto:var(--txt);--amostra-borda:var(--line);--amostra-destaque:#FACC15;--amostra-destaque-texto:#1a1206;--amostra-raio:14px}
+  .two{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:26px;align-items:start}
+  @media(max-width:900px){.two{grid-template-columns:1fr}}
+  ol.q{margin:.4em 0 0;padding-left:1.3em} ol.q li{margin:.45em 0}
+  ul.lim{padding-left:1.2em;margin:0;max-width:78ch} ul.lim li{margin:.6em 0}
+  footer{padding:46px 0;text-align:center;color:var(--mut);font-size:.9rem}
+  .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:.3em .8em;font-size:.78rem;color:var(--mut);margin:0 4px 6px}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="brand" href="#top"><span class="emoji">📐</span> site-que-vende</a>
+  <span class="sep">|</span>
+  <span class="clubpro">
+    <a class="inema" href="https://inema.club" target="_blank" rel="noopener">INEMA.CLUB</a>
+    <span class="sep">-</span>
+    <a class="pro" href="https://inema.pro" target="_blank" rel="noopener">PRO</a>
+  </span>
+  <div class="links">
+    <a class="sec" href="#padroes">Los 5 patrones</a>
+    <a class="sec" href="#antes-depois">Antes y después</a>
+    <a class="sec" href="#guia">Usar</a>
+    <a class="sec" href="#amostras">Muestras</a>
+    <a class="sec" href="#processo">Proceso</a>
+    <a class="sec" href="#limites">Límites</a>
+    <span class="lang"><a href="../">PT</a><a href="../en/">EN</a><a class="on" href="./">ES</a></span>
+    <button class="tgl" id="themeToggle" aria-label="Alternar tema" title="Alternar tema">🌙</button>
+    <a class="btn" href="https://github.com/inematds/site-que-vende" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</div></nav>
+
+<header class="hero" id="top">
+  <div class="glow"></div>
+  <div class="wrap">
+    <div>
+      <span class="chip">Kit INEMA · auditor de sitios</span>
+      <h1>¿Tu sitio hecho con IA quedó bonito y aun así <span class="amb">parece barato</span>?</h1>
+      <p class="lead">Siempre son los mismos 5 motivos. Este kit mide los 5 en tu página y te dice qué corregir.</p>
+      <div class="cta">
+        <a class="btn" href="#guia">Empezar la guía</a>
+        <a class="btn ghost" href="https://github.com/inematds/site-que-vende" target="_blank" rel="noopener">Ver en GitHub</a>
+      </div>
+    </div>
+    <figure><img src="../assets/banner-es.jpg" alt="Banner de site-que-vende: los 5 patrones medidos en tu página" width="1400" height="788"></figure>
+  </div>
+</header>
+
+<section id="resumo" class="resumo"><div class="wrap">
+  <span class="chip">En resumen</span>
+  <p>El site-que-vende es un kit que mide, en el navegador, los cinco patrones que distinguen el sitio que atrae clientes del sitio «bonito y barato» hecho con IA, y te dice qué corregir. Sirve para quienes tienen un negocio pequeño o crean sitios para negocios pequeños. El kit abre tu página en la computadora y en el celular, mide texto, color, capas, movimiento y muestra gratis, y te entrega un informe con la lista de correcciones lista para copiar y pegar en tu agente de código (el programa de IA que edita los archivos por ti). Para usarlo, necesitas Node.js y una terminal.</p>
+</div></section>
+
+<section id="oque"><div class="wrap">
+  <span class="chip">Qué es</span>
+  <h2>Un auditor que mide en vez de opinar</h2>
+  <p class="sub">La vista entrenada se cansa y discrepa. El auditor abre la página real, en 1440×900 y en 390×844, y mide siempre de la misma manera.</p>
+  <figure style="margin:0 0 26px;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px -30px #000"><img src="../assets/banner-grade-es.jpg" alt="Los cinco patrones: espejo, resaltador, capas, movimiento y muestra gratis, además del auditor" loading="lazy" width="1400" height="788" style="width:100%;height:auto;display:block"></figure>
+  <div class="grid g3">
+    <div class="card"><h3>📏 Mide la página renderizada</h3><p>El texto de la primera pantalla, dónde aparece el color del botón, las capas, qué se mueve y si hay algo que el visitante pueda probar. El resultado va de <code>0 de 5</code> a <code>5 de 5</code>.</p></div>
+    <div class="card"><h3>🧾 Entrega la lista de correcciones</h3><p>Además del informe para abrir en el navegador, guarda el <code>consertar.md</code>: qué falló y qué hacer, listo para pegar en Claude Code, Codex o Cursor.</p></div>
+    <div class="card"><h3>🧮 Incluye la muestra gratis lista</h3><p>Un archivo, <code>amostra.js</code>, con calculadora y quiz configurados mediante JSON. Sin dependencias, sin conexión, sin recopilar nada.</p></div>
+  </div>
+
+  <h3 style="margin:34px 0 12px;font-size:1.1rem">Qué incluye el repositorio</h3>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>Elemento</th><th>Archivo</th><th>Función</th></tr>
+    <tr><td>Auditor</td><td><code>skill/site-que-vende/scripts/auditar.js</code></td><td>abre la página (URL o archivo), mide los 5 patrones, guarda <code>relatorio.html</code>, <code>relatorio.json</code>, <code>consertar.md</code> y las capturas</td></tr>
+    <tr><td>Mediciones</td><td><code>skill/site-que-vende/scripts/medir.js</code></td><td>el código que se ejecuta dentro de la página (color, botón, capas, movimiento, muestra)</td></tr>
+    <tr><td>Muestras</td><td><code>skill/site-que-vende/amostras/amostra.js</code></td><td><code>&lt;amostra-calculadora&gt;</code> y <code>&lt;amostra-quiz&gt;</code>: un archivo, sin dependencias, configurados mediante JSON</td></tr>
+    <tr><td>Skill</td><td><code>skill/site-que-vende/SKILL.md</code></td><td>los 5 pasos para el agente: brief, medir, corregir, medir de nuevo, revisión humana</td></tr>
+    <tr><td>Brief</td><td><code>skill/site-que-vende/referencias/brief.md</code></td><td>las preguntas antes del diseño y el pedido listo para pegar</td></tr>
+    <tr><td>Ejemplos</td><td><code>exemplos/ruim/</code> y <code>exemplos/bom/</code></td><td>el mismo negocio ficticio: uno falla en los 5 patrones y el otro los supera</td></tr>
+    <tr><td>Pruebas</td><td><code>tests/rodar.sh</code></td><td>comprueba que el ejemplo malo falla por el motivo correcto, que el bueno supera la prueba y que las muestras funcionan</td></tr>
+  </table></div>
+</div></section>
+
+<section id="padroes"><div class="wrap">
+  <span class="chip">Los 5 patrones</span>
+  <h2>Los cinco motivos, uno por uno</h2>
+  <p class="sub">Para cada patrón: la idea, el número de la prueba, qué mide el auditor y cómo corregirlo. Las cifras provienen de pruebas publicadas por quienes las realizaron. Cuando la cifra proviene de quien vende la herramienta, se indica.</p>
+
+  <div class="pad" id="p1">
+    <div class="head"><div class="n">1</div><div><h3>Prueba del espejo</h3><p>La primera pantalla dice para quién es, qué gana la persona y qué debe hacer ahora.</p></div></div>
+    <div>
+      <h4>La idea</h4>
+      <p>Cuando la persona adecuada llega a la primera pantalla, tiene que verse reflejada: su problema, su mundo y una señal clara de que está en el lugar correcto.</p>
+      <h4>Qué mostraron las pruebas</h4>
+      <p>Una página de empleos para camioneros se rehízo pensando en los conductores, después de escucharlos: la mitad accedía desde el celular, el título no ofrecía ningún beneficio y la foto era un apretón de manos de un banco de imágenes.</p>
+      <div class="bars">
+        <div><i style="width:36%"></i><b>12,1%</b> antes</div>
+        <div><i class="on" style="width:65%"></i><b>21,7%</b> después (79,3% mejor)</div>
+      </div>
+      <div class="bigs">
+        <div class="big"><b>+90%</b><span>de clics a la página de precios al cambiar "Las empresas crecen más rápido en línea" por "Crea una página para tu negocio"</span></div>
+        <div class="big"><b>+31,4%</b><span>de conversión al repetir en el título la palabra que la persona había buscado</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>Qué mide el auditor</h4>
+      <ul>
+        <li>si hay un título en la primera pantalla y si no es una frase que sirve para cualquier empresa;</li>
+        <li>si el título tiene hasta 16 palabras;</li>
+        <li>si hay UN botón principal en la primera pantalla, en la computadora (1440×900) y en el celular (390×844);</li>
+        <li>si el texto del botón indica qué sucede (no "Más información", "Enviar");</li>
+        <li>si hay un segundo botón destacado que compite con el principal.</li>
+      </ul>
+      <h4>Cómo corregirlo</h4>
+      <ul>
+        <li>Reescribe con las respuestas del brief. El resultado va en el título, no la característica.</li>
+        <li>Un botón, una acción, en la primera pantalla, justo debajo del título.</li>
+        <li>En el celular, acorta lo que va antes para que el botón quepa en 390 px.</li>
+      </ul>
+      <p class="src">No mide si el texto es verdadero ni si se dirige a la persona adecuada. Por eso devuelve las tres preguntas de la revisión humana.</p>
+    </div>
+  </div>
+
+  <div class="pad" id="p2">
+    <div class="head"><div class="n">2</div><div><h3>Regla del resaltador</h3><p>El color de acento solo aparece en lo que se puede clicar.</p></div></div>
+    <div>
+      <h4>La idea</h4>
+      <p>Si marcas una línea del libro, la encuentras en dos segundos. Si marcas todo, no marcaste nada. La IA pone el color de acento en el título, los íconos, el borde, el fondo y el botón. Entonces el botón desaparece.</p>
+      <h4>La cifra</h4>
+      <div class="bigs">
+        <div class="big"><b>60 / 30 / 10</b><span>60% de fondo, 30% de estructura (texto, menú, tarjetas), 10% de acento, que solo va en botones y enlaces</span></div>
+        <div class="big"><b>2</b><span>usos del color del botón fuera de elementos clicables: ese es el máximo que tolera el auditor</span></div>
+        <div class="big"><b>15%</b><span>de la página con el color de acento: por encima de eso, falla</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>Qué mide el auditor</h4>
+      <ul>
+        <li>cuál es el color del botón principal;</li>
+        <li>en cuántos elementos que no se pueden clicar aparece (título, texto, ícono, borde, fondo);</li>
+        <li>si el botón se distingue del fondo que lo rodea;</li>
+        <li>qué parte de la página ocupa el color de acento y qué parte ocupa el color de fondo.</li>
+      </ul>
+      <h4>Cómo corregirlo</h4>
+      <ul>
+        <li>Solo tres colores.</li>
+        <li>El color del botón se quita del título, el ícono, el borde y el fondo. El resto usa el color del texto y el color de estructura.</li>
+      </ul>
+      <p class="src">La imagen <code>desktop-marca-texto.png</code> marca cada uso incorrecto. Mira un ejemplo real en <a href="#antes-depois">Antes y después</a>.</p>
+    </div>
+  </div>
+
+  <div class="pad" id="p3">
+    <div class="head"><div class="n">3</div><div><h3>Frente, medio y fondo</h3><p>Escenario atrás, contenido en el medio, botón adelante.</p></div></div>
+    <div>
+      <h4>La idea</h4>
+      <p>En un sitio barato, todo está aplanado en el mismo plano y la vista no sabe por dónde empezar. En un escenario hay un decorado pintado, los muebles y el actor. En el sitio: fondo (foto o forma), medio (el contenido), frente (el botón).</p>
+      <h4>La cifra</h4>
+      <div class="bigs">
+        <div class="big"><b>1</b><span>elemento, como mínimo, que cruce el límite entre dos secciones</span></div>
+        <div class="big"><b>0</b><span>elementos con sombra: todo en el mismo plano, falla</span></div>
+        <div class="big"><b>más de 6</b><span>sombras, y en más de la mitad de las cajas: sombra en todo, falla</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>Qué mide el auditor</h4>
+      <ul>
+        <li>si la primera pantalla tiene una foto, un video, una forma o un degradado detrás del texto;</li>
+        <li>cuántos elementos cruzan el límite entre dos secciones;</li>
+        <li>cuántos elementos tienen sombra.</li>
+      </ul>
+      <h4>Cómo corregirlo</h4>
+      <ul>
+        <li>Algo real en el fondo de la primera pantalla: una foto del trabajo o del producto, o una forma suave.</li>
+        <li>UN elemento (tarjeta o imagen) que entre hasta la mitad de la sección de abajo.</li>
+        <li>Sombra solo en lo que importa: el botón y una tarjeta.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="pad" id="p4">
+    <div class="head"><div class="n">4</div><div><h3>Movimiento con función</h3><p>Texto listo al instante, una cosa se mueve por pantalla, se puede desactivar.</p></div></div>
+    <div>
+      <h4>La idea</h4>
+      <p>La animación es la forma más rápida de hacer que un sitio parezca costoso y también de que parezca hecho por IA. Cada animación necesita una función: mostrar el producto, indicar el siguiente paso o mostrar lo que acaba de pasar.</p>
+      <h4>Qué mostraron los estudios</h4>
+      <ul>
+        <li>El movimiento atrae la mirada. Esa es su ventaja y su defecto: la aleja de lo que la persona vino a hacer.</li>
+        <li>Un estudio universitario probó el mismo sitio con y sin parallax (el fondo que se mueve a otra velocidad al desplazarse): las personas encontraron más divertida y profesional la versión con parallax, pero la experiencia de uso en general no mejoró.</li>
+      </ul>
+      <div class="bigs">
+        <div class="big"><b>1 de cada 3</b><span>adultos mayores de 40 años, en una encuesta estadounidense, tenía algún signo de disfunción del oído interno (equilibrio). Por eso los celulares y las computadoras tienen la opción "reducir movimiento".</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>Qué mide el auditor</h4>
+      <ul>
+        <li>si el título y el botón se leen 0,4 s después de que carga la página;</li>
+        <li>cuántas cosas cambian de opacidad, posición, recorte o filtro en cada pantalla, al desplazarse y en reposo: falla con 4 o más, avisa con 2 o 3;</li>
+        <li>cuántas siguen moviéndose con <code>prefers-reduced-motion: reduce</code>: deben ser cero.</li>
+      </ul>
+      <h4>Cómo corregirlo</h4>
+      <ul>
+        <li>El título, el texto y el botón de la primera pantalla aparecen listos, sin animación de entrada.</li>
+        <li>Una cosa se mueve por pantalla. El resto queda quieto.</li>
+        <li>Dentro de <code>@media (prefers-reduced-motion: reduce)</code>, desactiva todo.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="pad" id="p5">
+    <div class="head"><div class="n">5</div><div><h3>Muestra gratis</h3><p>El visitante prueba el resultado antes de dejar sus datos de contacto.</p></div></div>
+    <div>
+      <h4>La idea</h4>
+      <p>Casi todos los sitios lo explican todo y entregan un formulario. Es mejor dejar que la persona pruebe el resultado antes de pedirle cualquier cosa. Valoramos más lo que ayudamos a crear. Cuando la persona introduce sus números, el resultado es suyo.</p>
+      <h4>La cifra</h4>
+      <div class="bigs">
+        <div class="big"><b>cerca del 45%</b><span>de conversión en una calculadora del precio del aparato en el sitio de un ortodoncista, según la empresa que hizo la herramienta (cifra del fabricante, no de un estudio independiente)</span></div>
+        <div class="big"><b>7</b><span>pasos o campos: por encima de eso, el auditor reprueba la página porque la persona no llega al final</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>Qué mide el auditor</h4>
+      <ul>
+        <li>si hay una herramienta que no es un formulario de contacto;</li>
+        <li>si cambia el resultado en pantalla cuando alguien interactúa con ella (mueve los controles y hace clic);</li>
+        <li>el tamaño: cuántos pasos o campos tiene.</li>
+      </ul>
+      <h4>Cómo corregirlo</h4>
+      <ul>
+        <li>Encuentra la pregunta que todos los clientes hacen antes de comprar ("¿cuánto cuesta?", "¿cuál me sirve?").</li>
+        <li>Respóndela con un quiz, una calculadora o una herramienta útil. Las <a href="#amostras">muestras listas</a> resuelven las dos primeras.</li>
+        <li>Los números de la calculadora los proporciona el dueño del negocio.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="antes-depois"><div class="wrap">
+  <span class="chip">Antes y después</span>
+  <h2>El mismo negocio: 0 de 5 y 5 de 5</h2>
+  <p class="sub">Las dos páginas son de una empresa ficticia de agenda para peluqueras. El auditor tomó las fotos de abajo.</p>
+  <div class="ex">
+    <figure class="shot"><img src="../assets/ruim-tela1.jpg" alt="Primera pantalla del ejemplo malo: título morado genérico, sin botón a la vista" loading="lazy" width="1000" height="625"><figcaption><strong class="bad">0 de 5.</strong> Un título que sirve para cualquier empresa, el color del botón por todas partes y ningún botón en la primera pantalla. (Captura en portugués.) <a href="https://inematds.github.io/site-que-vende/exemplos/ruim/" target="_blank" rel="noopener">Abrir el ejemplo malo</a></figcaption></figure>
+    <figure class="shot"><img src="../assets/bom-tela1.jpg" alt="Primera pantalla del ejemplo bueno: título con el beneficio, un botón naranja, foto de salón al fondo y una tarjeta que cruza el borde" loading="lazy" width="1000" height="625"><figcaption><strong class="ok">5 de 5.</strong> El beneficio en el título, un botón, una foto real de fondo y una tarjeta que cruza el borde. (Captura en portugués.) <a href="https://inematds.github.io/site-que-vende/exemplos/bom/" target="_blank" rel="noopener">Abrir el ejemplo bueno</a></figcaption></figure>
+  </div>
+
+  <h3 style="margin:34px 0 12px;font-size:1.1rem">Qué midió el auditor en ambas</h3>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>Medida</th><th>Ejemplo malo</th><th>Ejemplo bueno</th></tr>
+    <tr><td>Título</td><td>"Soluções inovadoras de agendamento com IA" (Soluciones innovadoras de agenda con IA)</td><td>"Encha sua agenda sem responder mensagem." (Llena tu agenda sin responder mensajes.)</td></tr>
+    <tr><td>Botón principal</td><td>"Enviar", fuera de la primera pantalla</td><td>"Ver quanto meu horário vago custa" (Ver cuánto cuesta mi horario disponible), en la primera pantalla de la computadora y el celular</td></tr>
+    <tr><td>Color del botón sin clic</td><td><span class="bad">35 lugares</span></td><td><span class="ok">0</span></td></tr>
+    <tr><td>Fondo de la primera pantalla</td><td>color liso</td><td>imagen de fondo</td></tr>
+    <tr><td>Piezas que cruzan el borde de una sección</td><td><span class="bad">0</span></td><td><span class="ok">1</span></td></tr>
+    <tr><td>Elementos con sombra</td><td><span class="bad">0</span></td><td><span class="ok">3</span></td></tr>
+    <tr><td>Cosas que se mueven en la misma pantalla</td><td><span class="bad">4</span></td><td><span class="ok">1</span></td></tr>
+    <tr><td>Se mueven con "reducir movimiento" activado</td><td><span class="bad">4</span></td><td><span class="ok">0</span></td></tr>
+    <tr><td>Muestra gratis</td><td>no: solo formulario de contacto</td><td><code>amostra-calculadora</code>, 2 campos, responde de inmediato</td></tr>
+  </table></div>
+
+  <div class="ex" style="margin-top:26px">
+    <figure class="shot"><img src="../assets/marca-texto.jpg" alt="Mapa del resaltador del ejemplo malo: está marcado el contorno de cada lugar donde aparece el color del botón sin que haya un clic" loading="lazy" width="1000" height="1125"><figcaption><strong>El mapa del resaltador.</strong> En el ejemplo malo, el auditor marcó el contorno de los 35 lugares donde aparece el color del botón sin ser un clic: 9 bordes, 11 textos, 11 títulos y 4 iconos o sellos. (Captura en portugués.)</figcaption></figure>
+    <figure class="shot"><img src="../assets/relatorio.jpg" alt="Fragmento de relatorio.html del ejemplo malo: 0 de 5, con la lista de fallas y correcciones del patrón 1" loading="lazy" width="1000" height="745"><figcaption><strong>El informe.</strong> El <code>relatorio.html</code> muestra la calificación, cada falla medida, qué hacer y las medidas una por una. (Captura en portugués.)</figcaption></figure>
+  </div>
+</div></section>
+
+<section id="guia"><div class="wrap">
+  <span class="chip">Guía de uso · paso a paso</span>
+  <h2>Úsalo en 2 minutos</h2>
+  <p class="sub">Necesitas tener <a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a> y git instalados. Los comandos son para la terminal bash o zsh (Linux y Mac; en Windows, usa WSL).</p>
+  <p class="src">Para comprobar: <code>node -v</code> y <code>git --version</code> deben responder con un número de versión. WSL es la terminal Linux que Microsoft ofrece dentro de Windows (<a href="https://learn.microsoft.com/windows/wsl/install" target="_blank" rel="noopener">cómo instalar</a>). Desde el paso 2 en adelante, ejecuta los comandos dentro de la carpeta <code>site-que-vende</code>.</p>
+
+  <div class="step"><div class="b">1</div><div>
+    <h3>Descarga el kit e instala el navegador de prueba</h3>
+    <p>El auditor usa Playwright, que controla un Chromium propio. La instalación se hace una sola vez.</p>
+<pre>git clone https://github.com/inematds/site-que-vende && cd site-que-vende
+cd skill/site-que-vende/scripts && npm install && npx playwright install chromium && cd -</pre>
+  </div></div>
+
+  <div class="step"><div class="b">2</div><div>
+    <h3>Mide tu página</h3>
+    <p>Pasa la dirección del sitio o la ruta de un archivo HTML. La carpeta de <code>--saida</code> recibe el informe.</p>
+<pre>node skill/site-que-vende/scripts/auditar.js https://seusite.com.br --saida auditoria</pre>
+    <p>Con un archivo en lugar de la dirección:</p>
+<pre>node skill/site-que-vende/scripts/auditar.js minha-pagina/index.html --saida auditoria</pre>
+  </div></div>
+
+  <div class="step"><div class="b">3</div><div>
+    <h3>Lee el resultado</h3>
+    <p>Esta es la salida real del ejemplo malo de este repositorio (<code>node skill/site-que-vende/scripts/auditar.js exemplos/ruim/index.html --saida auditoria</code>):</p>
+<pre>site-que-vende · exemplos/ruim/index.html
+
+FALHA  1. Teste do espelho
+         - Título genérico: "Soluções inovadoras de agendamento com IA" serve para qualquer empresa (casou com /solu[çc][õo]es? (inovador|inteligent|completa|digita)/i).
+         - O botão principal ("Enviar") não aparece na primeira tela do computador.
+         - No celular, o botão principal não aparece na primeira tela.
+         - O botão diz "Enviar": não conta o que acontece depois do clique.
+FALHA  2. Regra do marca-texto
+         - A cor do botão (#8b5cf6) aparece em 35 lugares que não são clique (9 borda, 11 texto, 11 título, 4 ícone ou selo). Veja desktop-marca-texto.png.
+FALHA  3. Frente, meio e fundo
+         - A primeira tela é uma caixa de cor lisa: não há foto, forma nem degradê atrás do texto.
+         - Nenhuma peça atravessa a borda de uma seção: a página é uma pilha de caixas.
+         - Nenhum elemento tem sombra: tudo está no mesmo plano.
+FALHA  4. Movimento com função
+         - O título não está legível 0,4 s depois de a página abrir (opacidade 0.38): o visitante espera a animação.
+         - 4 coisas se movem ao mesmo tempo na tela 2 (div.cartao, div.cartao, div.cartao, div.cartao).
+         - Com "reduzir movimento" ligado no aparelho, 4 elemento(s) continuam se movendo.
+FALHA  5. Amostra grátis
+         - A página explica e entrega um formulário de contato: não há nada para o visitante experimentar.
+
+0 de 5 padrões passam.  Relatório: auditoria/relatorio.html
+O que consertar (cole no seu agente): auditoria/consertar.md</pre>
+<p class="note">Los mensajes del auditor, el <code>relatorio.html</code> y el <code>consertar.md</code> salen en portugués. Abajo está la misma salida traducida, solo para leerla. Puedes pegar el <code>consertar.md</code> tal como está en tu agente y pedirle que responda en tu idioma.</p>
+<pre class="tr">site-que-vende · exemplos/ruim/index.html
+
+FALLA  1. Prueba del espejo
+         - Título genérico: "Soluções inovadoras de agendamento com IA" sirve para cualquier empresa (coincidió con /solu[çc][õo]es? (inovador|inteligent|completa|digita)/i).
+         - El botón principal ("Enviar") no aparece en la primera pantalla de la computadora.
+         - En el celular, el botón principal no aparece en la primera pantalla.
+         - El botón dice "Enviar": no cuenta qué sucede después del clic.
+FALLA  2. Regla del resaltador
+         - El color del botón (#8b5cf6) aparece en 35 lugares que no son clicables (9 bordes, 11 textos, 11 títulos, 4 iconos o sellos). Consulta desktop-marca-texto.png.
+FALLA  3. Frente, medio y fondo
+         - La primera pantalla es un bloque de color liso: no hay foto, forma ni degradado detrás del texto.
+         - Ningún elemento atraviesa el borde de una sección: la página es una pila de bloques.
+         - Ningún elemento tiene sombra: todo está en el mismo plano.
+FALLA  4. Movimiento con función
+         - El título no es legible 0,4 s después de que se abra la página (opacidad 0.38): el visitante espera la animación.
+         - 4 cosas se mueven al mismo tiempo en la pantalla 2 (div.cartao, div.cartao, div.cartao, div.cartao).
+         - Con «reducir movimiento» activado en el dispositivo, 4 elemento(s) siguen moviéndose.
+FALLA  5. Muestra gratis
+         - La página explica y ofrece un formulario de contacto: no hay nada que el visitante pueda probar.
+
+0 de 5 patrones pasan.  Informe: auditoria/relatorio.html
+Qué corregir (pega en tu agente): auditoria/consertar.md</pre>
+    <p>El número de opacidad en la línea del patrón 4 cambia un poco en cada ejecución, porque depende del momento de la medición. El fragmento "coincidió con /.../" es la regla interna que reconoció el título genérico: puedes ignorarlo.</p>
+    <p>En la carpeta <code>auditoria/</code> están: <code>relatorio.html</code> (para abrir en el navegador), <code>relatorio.json</code> (las medidas), <code>consertar.md</code> (la lista de tareas) y las capturas <code>desktop-tela1.png</code>, <code>celular-tela1.png</code>, <code>desktop-pagina.png</code> y <code>desktop-marca-texto.png</code>.</p>
+    <p>Código de salida: <code>0</code> pasaron los cinco, <code>1</code> falló alguno, <code>2</code> error de uso. Sirve en CI (la verificación automática que se ejecuta con cada cambio en el código).</p>
+  </div></div>
+
+  <div class="step"><div class="b">4</div><div>
+    <h3>Corrige solo lo que falló</h3>
+    <p>Pega el <code>auditoria/consertar.md</code> en tu agente de código, junto con la página. El orden va del patrón 1 al 5: texto antes que color, color antes que capa. Sin agente, abre el <code>relatorio.html</code> y haz las correcciones a mano: cada falla indica qué hacer.</p>
+  </div></div>
+
+  <div class="step"><div class="b">5</div><div>
+    <h3>Vuelve a medir hasta obtener 5 de 5</h3>
+    <p>Repite los pasos 2 a 4. No modifiques el auditor ni las reglas para aprobar. Si después de 3 vueltas un patrón sigue fallando, detente y revisa la medida: puede ser una decisión tuya.</p>
+  </div></div>
+
+  <div class="step"><div class="b">6</div><div>
+    <h3>Haz la revisión humana antes de publicar</h3>
+    <p>El auditor no evalúa el texto. Mira <code>auditoria/desktop-tela1.png</code> y <code>auditoria/celular-tela1.png</code> y responde las tres preguntas que cierran el <code>consertar.md</code>:</p>
+    <ul class="mut" style="margin:0;padding-left:1.2em">
+      <li>¿Para quién es? (¿el visitante adecuado se reconoce en el título?)</li>
+      <li>¿Qué gano? (¿es un resultado, no una característica?)</li>
+      <li>¿Qué hago ahora? (¿un botón, una acción?)</li>
+    </ul>
+  </div></div>
+
+  <h3 id="skill" style="margin:40px 0 8px;font-size:1.25rem">Con la skill, en Claude Code</h3>
+  <p class="sub" style="margin-bottom:1em">Una skill es una carpeta con un archivo <code>SKILL.md</code>: las instrucciones que sigue el agente. La de este kit le indica al agente que haga el brief, mida, corrija, vuelva a medir y se detenga para que hagas tu revisión.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Instalar y cargar</h3>
+      <p>Dentro de la carpeta del kit, crea el acceso directo en la carpeta de skills de Claude Code:</p>
+<pre>mkdir -p ~/.claude/skills
+ln -s "$PWD/skill/site-que-vende" ~/.claude/skills/site-que-vende</pre>
+      <p>Claude Code lee <code>~/.claude/skills/site-que-vende/SKILL.md</code> cuando comienza una sesión. Abre una sesión nueva y pide: "audita mi sitio con site-que-vende" o "¿por qué mi sitio no convierte?". Si no lo carga por sí solo, di: "lee <code>~/.claude/skills/site-que-vende/SKILL.md</code> y sigue los pasos".</p>
+    </div>
+    <div class="card">
+      <h3>Con otro agente o sin agente</h3>
+      <p>En Codex o en Cursor, abre la carpeta del kit y di: "lee <code>skill/site-que-vende/SKILL.md</code> y sigue los pasos".</p>
+      <p style="margin-top:.7em">Sin ningún agente, el proceso manual es el de los seis pasos anteriores: el auditor y las muestras funcionan por sí solos, y el <code>relatorio.html</code> indica qué hacer ante cada falla.</p>
+      <p style="margin-top:.7em">Para verificar el kit: <code>bash tests/rodar.sh</code> debe terminar en <code>TUDO OK</code>.</p>
+    </div>
+  </div>
+
+  <div class="note"><strong>Qué nunca hacer para aprobar.</strong> Inventar un testimonio, un número, un cliente, un premio o un sello. Poner <code>data-cta</code> en un botón oculto o esconder elementos solo para que el auditor apruebe. Cambiar el texto que escribió el dueño cuando ya responde las tres preguntas. Pedir el correo electrónico antes de mostrar el resultado de la muestra.</div>
+</div></section>
+
+<section id="amostras"><div class="wrap">
+  <span class="chip">Muestra gratis</span>
+  <h2>Calculadora y quiz listos para pegar</h2>
+  <p class="sub">Copia <code>skill/site-que-vende/amostras/amostra.js</code> en tu sitio, pega la etiqueta y cambia el JSON por los números de tu negocio. No se envía nada a ningún servidor.</p>
+
+  <div class="two">
+    <div>
+      <h3 style="font-size:1.05rem;margin-bottom:.4em">El fragmento para pegar</h3>
+<pre>&lt;amostra-calculadora&gt;
+  &lt;script type="application/json"&gt;
+  { "titulo": "Quanto custa pintar a sua casa?", "base": 350,
+    "campos": [
+      {"rotulo": "Área de parede", "tipo": "faixa", "min": 20, "max": 300, "passo": 10, "valor": 80, "unidade": "m²", "porUnidade": 28},
+      {"rotulo": "Acabamento", "tipo": "opcoes", "opcoes": [{"rotulo": "Econômico", "vezes": 1}, {"rotulo": "Premium", "vezes": 1.6}]}
+    ],
+    "margem": 12, "prefixo": "Sua pintura fica entre",
+    "botao": {"texto": "Receber o orçamento exato", "href": "#contato"} }
+  &lt;/script&gt;
+&lt;/amostra-calculadora&gt;
+&lt;script src="amostra.js"&gt;&lt;/script&gt;</pre>
+      <p class="mut" style="font-size:.95rem">El color del botón viene de tu página:</p>
+<pre>:root { --amostra-destaque: #c2410c; }</pre>
+      <p class="mut" style="font-size:.95rem">También puedes ajustar <code>--amostra-fundo</code>, <code>--amostra-texto</code>, <code>--amostra-borda</code> y <code>--amostra-raio</code>. La muestra hereda la fuente de la página y no tiene animación.</p>
+    </div>
+    <div class="demo">
+      <h3 style="font-size:1.05rem;margin-bottom:.6em">Funcionando aquí</h3>
+      <amostra-calculadora>
+        <script type="application/json">
+        {
+          "titulo": "¿Cuánto cuesta pintar tu casa?",
+          "subtitulo": "Estimación al instante, sin registrarte.",
+          "base": 350,
+          "campos": [
+            {
+              "rotulo": "Área de las paredes",
+              "tipo": "faixa",
+              "min": 20,
+              "max": 300,
+              "passo": 10,
+              "valor": 80,
+              "unidade": "m²",
+              "porUnidade": 28
+            },
+            {
+              "rotulo": "Acabado",
+              "tipo": "opcoes",
+              "opcoes": [
+                {
+                  "rotulo": "Económico",
+                  "vezes": 1
+                },
+                {
+                  "rotulo": "Estándar",
+                  "vezes": 1.25
+                },
+                {
+                  "rotulo": "Premium",
+                  "vezes": 1.6
+                }
+              ]
+            },
+            {
+              "rotulo": "¿También el techo?",
+              "tipo": "opcoes",
+              "opcoes": [
+                {
+                  "rotulo": "No",
+                  "soma": 0
+                },
+                {
+                  "rotulo": "Sí",
+                  "soma": 600
+                }
+              ]
+            }
+          ],
+          "margem": 12,
+          "arredondar": 50,
+          "prefixo": "Tu pintura cuesta entre",
+          "sufixo": "con pintura y mano de obra",
+          "botao": {
+            "texto": "Recibir el presupuesto exacto",
+            "href": "#amostras"
+          },
+          "nota": "Valores de ejemplo: cámbialos por los tuyos.",
+          "idioma": "es-419",
+          "moeda": "USD"
+        }
+        </script>
+      </amostra-calculadora>
+      <p class="src">Cambia el área y el acabado: el resultado cambia al instante. Eso es lo que mide el patrón 5. <a href="../../skill/site-que-vende/amostras/exemplo.html">Ver el quiz y la calculadora en la página de ejemplo</a> (en portugués).</p>
+    </div>
+  </div>
+
+  <h3 style="margin:34px 0 12px;font-size:1.1rem">Qué puedes configurar en el JSON</h3>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>Etiqueta</th><th>Claves</th><th>Cómo funciona</th></tr>
+    <tr><td><code>&lt;amostra-calculadora&gt;</code></td><td><code>titulo</code>, <code>subtitulo</code>, <code>base</code>, <code>campos</code>, <code>margem</code>, <code>arredondar</code>, <code>prefixo</code>, <code>sufixo</code>, <code>botao</code>, <code>nota</code>, <code>moeda</code>, <code>idioma</code></td><td>resultado = (base + suma de los campos) × multiplicadores, mostrado como rango (más o menos el margen). El campo <code>"tipo": "faixa"</code> usa <code>porUnidade</code>; con <code>"multiplica": true</code> se incluye como multiplicador. El campo <code>"tipo": "opcoes"</code> usa <code>soma</code> o <code>vezes</code>.</td></tr>
+    <tr><td><code>&lt;amostra-quiz&gt;</code></td><td><code>titulo</code>, <code>perguntas</code>, <code>resultados</code>, <code>prefixo</code>, <code>refazer</code></td><td>cada opción suma <code>pontos</code> a uno o más resultados; gana el que tenga más puntos. Cada resultado tiene <code>titulo</code>, <code>texto</code> y <code>botao</code>.</td></tr>
+  </table></div>
+  <p class="note">Las claves del JSON están en portugués (<code>titulo</code>, <code>campos</code>, <code>rotulo</code>); los valores son tuyos, en cualquier idioma. El contador del quiz ("Pregunta 1 de 3") está escrito en portugués dentro de <code>amostra.js</code>. El separador entre los dos valores del rango de la calculadora (" a ") también está en portugués, y coincide con el español. Las etiquetas, los textos de los botones, la moneda (<code>moeda</code>) y el formato de los números (<code>idioma</code>) vienen de tu JSON.</p>
+</div></section>
+
+<section id="brief"><div class="wrap">
+  <span class="chip">Brief</span>
+  <h2>Las preguntas antes de cualquier diseño</h2>
+  <p class="sub">Responde antes de pedirle la página a la IA y pega las respuestas en el pedido. Sin ellas, la IA escribe para «cualquier empresa» y ningún diseño lo soluciona.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Las tres de la Prueba del espejo (obligatorias)</h3>
+      <ol class="q mut">
+        <li><strong style="color:var(--txt)">¿Para quién es?</strong> Una persona, no un mercado. «Peluquera que atiende sola», no «profesionales de belleza».</li>
+        <li><strong style="color:var(--txt)">¿Qué gana esa persona?</strong> El resultado en su vida, no la función. «Agenda llena sin responder mensajes», no «reservas con IA».</li>
+        <li><strong style="color:var(--txt)">¿Qué hace ahora?</strong> Una sola acción, con lo que sucede después del clic. «Ver horarios disponibles», no «Más información».</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Las que afinan el texto y los colores</h3>
+      <ol class="q mut" start="4">
+        <li>¿Qué palabra usa esa persona para buscar esto? Usa la misma palabra en el título.</li>
+        <li>¿Cuál es la pregunta que todo cliente hace antes de comprar? Esa será la muestra gratis.</li>
+        <li>¿Dónde abrirá el sitio: en el celular o en la computadora? En el celular, ¿el botón cabe en la primera pantalla de 390 px?</li>
+        <li>¿Qué duda o miedo hace que desista? Respóndelo justo debajo del botón, en una línea.</li>
+        <li>¿Qué foto muestra su mundo? De su trabajo o de su producto, nunca de un banco de imágenes.</li>
+        <li>¿Cuáles son los tres colores? Fondo (60%), estructura (30%) y acento (10%, solo en botones y enlaces).</li>
+      </ol>
+    </div>
+  </div>
+  <h3 style="margin:30px 0 8px;font-size:1.1rem">Pedido listo para pegar</h3>
+  <p class="mut" style="margin:0 0 .4em;max-width:74ch">Cambia lo que está entre <code>&lt; &gt;</code> por tus respuestas. El número de cada campo corresponde a la pregunta anterior.</p>
+<pre class="tr">Crea la página de &lt;negocio&gt;.
+Para quién es: &lt;1&gt;
+Qué gana la persona: &lt;2&gt;
+Acción principal (un botón, marcado con data-cta): &lt;3&gt;
+Palabra que usa: &lt;4&gt;
+Muestra gratis (responde a «&lt;5&gt;»): usa amostras/amostra.js con &lt;amostra-calculadora&gt; o &lt;amostra-quiz&gt;; estos son los números: &lt;...&gt;
+Colores: fondo &lt;hex&gt;, estructura &lt;hex&gt;, acento &lt;hex&gt; (el acento solo en botones y enlaces).
+Primera pantalla: título, una línea de apoyo y el botón, listos y sin animación, con una foto real de fondo.
+Una pieza cruza el borde de la primera sección. Sombra solo en el botón y en la tarjeta principal.
+Como máximo, una cosa se mueve por pantalla, y nada se mueve con prefers-reduced-motion: reduce.
+No inventes testimonios, cifras ni clientes.
+Después ejecuta: node scripts/auditar.js index.html  y corrige hasta obtener 5 de 5.</pre>
+  <p class="src"><code>data-cta</code> es un atributo que pones en el HTML del botón principal (<code>&lt;a data-cta href="..."&gt;</code>) para indicarle al auditor cuál es. Sin la marca, el auditor elige por su cuenta el botón con más peso (tamaño y contraste) de la primera pantalla. Las rutas del pedido (<code>scripts/auditar.js</code>, <code>amostras/amostra.js</code>) parten de la carpeta <code>skill/site-que-vende/</code> del kit.</p>
+</div></section>
+
+<section id="processo"><div class="wrap">
+  <span class="chip">El proceso, de principio a fin</span>
+  <h2>Los 7 pasos y quién hace cada uno</h2>
+  <p class="sub">Tú decides lo que solo tú sabes. La IA escribe y corrige. El script mide sin gastar tokens.</p>
+  <div class="flow">
+    <span>Brief</span><span class="arr">→</span>
+    <span>Página</span><span class="arr">→</span>
+    <span>Medir</span><span class="arr">→</span>
+    <span>Corregir</span><span class="arr">→</span>
+    <span>Muestra</span><span class="arr">→</span>
+    <span>Medir de nuevo</span><span class="arr">→</span>
+    <span>Revisión humana y publicar</span>
+  </div>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>#</th><th>Paso</th><th>Qué sucede</th><th>Quién lo hace</th></tr>
+    <tr><td>1</td><td>Brief</td><td>responder las preguntas del brief: para quién, qué gana, qué hace ahora, tres colores, pregunta de la muestra</td><td>👤 tú, con la 🧠 IA</td></tr>
+    <tr><td>2</td><td>Página</td><td>la IA genera la página con el pedido listo del brief (o ya tienes el sitio en línea)</td><td>🧠 IA</td></tr>
+    <tr><td>3</td><td>Medir</td><td><code>node skill/site-que-vende/scripts/auditar.js &lt;url o archivo&gt; --saida auditoria</code></td><td>⚙️ script</td></tr>
+    <tr><td>4</td><td>Corregir</td><td>pegar <code>auditoria/consertar.md</code> en el agente; corregirá solo lo que falló, en el orden del 1 al 5</td><td>🧠 IA</td></tr>
+    <tr><td>5</td><td>Muestra</td><td>si falló el patrón 5: copiar <code>amostras/amostra.js</code> y configurar el quiz o la calculadora con los números del negocio</td><td>👤 tú, con la 🧠 IA</td></tr>
+    <tr><td>6</td><td>Medir de nuevo</td><td>repetir 3 y 4 hasta <code>5 de 5</code> (máximo 3 rondas; después de eso, la decisión es tuya)</td><td>⚙️ script</td></tr>
+    <tr><td>7</td><td>Revisión humana y publicar</td><td>mirar <code>desktop-tela1.png</code> y <code>celular-tela1.png</code>, responder las tres preguntas de la Prueba del espejo, publicar</td><td>👤 tú</td></tr>
+  </table></div>
+</div></section>
+
+<section id="limites"><div class="wrap">
+  <span class="chip">Límites</span>
+  <h2>Lee antes de confiar</h2>
+  <p class="sub">Lo que el auditor no ve, dicho con todas las letras.</p>
+  <ul class="lim">
+    <li><strong>Mide la forma, no la verdad.</strong> Un título específico y falso pasa. La revisión humana existe por eso.</li>
+    <li><strong>Botón principal negro, blanco o gris:</strong> el patrón 2 se convierte en una advertencia, porque no se puede contar dónde más aparece el color.</li>
+    <li><strong>Una animación hecha en <code>&lt;canvas&gt;</code> o WebGL</strong> cuenta como una sola cosa.</li>
+    <li><strong>El sitio de una marca grande</strong> suele fallar en varios patrones y aun así vender: ya tiene la confianza que el sitio de un negocio pequeño necesita ganarse en la primera pantalla.</li>
+    <li><strong>Pasar los cinco no garantiza ventas.</strong> Garantiza que el sitio no pierda clientes por los cinco motivos más comunes.</li>
+    <li><strong>Un sitio que no vende nada</strong> (portafolio de arte, invitación, página de un evento visual): los patrones 1 y 5 no aplican. Ejecuta el auditor solo para ver las mediciones.</li>
+    <li><strong>Los mensajes del auditor están en portugués.</strong> Las páginas auditadas pueden estar en portugués, inglés o español.</li>
+  </ul>
+</div></section>
+
+<footer>
+  <div class="wrap">
+    <div class="pill">Node.js</div><div class="pill">Playwright</div><div class="pill">Skill para Claude Code</div><div class="pill">Licencia MIT</div>
+    <p style="margin-top:18px">site-que-vende · kit abierto y gratuito ·
+      <a href="https://github.com/inematds/site-que-vende">inematds/site-que-vende</a> ·
+      <a href="https://inema.club">INEMA.CLUB</a></p>
+  </div>
+</footer>
+
+<script src="../../skill/site-que-vende/amostras/amostra.js"></script>
+<script>
+  (function(){
+    var KEY='site-que-vende-theme';
+    var b=document.body, t=document.getElementById('themeToggle');
+    var salvo=null; try{ salvo=localStorage.getItem(KEY); }catch(e){}
+    if(salvo==='light'){ b.classList.add('light'); t.textContent='☀️'; }
+    t.addEventListener('click',function(){
+      var light=b.classList.toggle('light');
+      t.textContent=light?'☀️':'🌙';
+      try{ localStorage.setItem(KEY, light?'light':'dark'); }catch(e){}
+    });
+  })();
+</script>
+</body>
+</html>

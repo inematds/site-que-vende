@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>site-que-vende: the 5 patterns measured on your page</title>
+<meta name="description" content="A free INEMA kit that measures the 5 patterns of a customer-attracting website in your browser and gives you a fix list ready to paste into your coding agent.">
+<link rel="alternate" hreflang="pt-BR" href="https://inematds.github.io/site-que-vende/guia/">
+<link rel="alternate" hreflang="en" href="https://inematds.github.io/site-que-vende/guia/en/">
+<link rel="alternate" hreflang="es" href="https://inematds.github.io/site-que-vende/guia/es/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0c10; --bg2:#14141b; --card:#16161e; --line:#272730;
+    --txt:#e9e9ee; --mut:#9a9aa6; --amb:#FACC15; --amb2:#f0c070; --sky:#38bdf8; --pro:#cbd5e1;
+    --ok:#7ce0c6; --bad:#f0918a;
+    color-scheme:dark;
+  }
+  body.light{
+    --bg:#f6f7f9; --bg2:#eceef2; --card:#ffffff; --line:#e1e3ea;
+    --txt:#1a1a22; --mut:#5b5b68; --amb:#a16207; --amb2:#a16207; --sky:#0369a1; --pro:#b45309;
+    --ok:#0e6b55; --bad:#a83426;
+    color-scheme:light;
+  }
+  body.light .hero .glow{opacity:.5}
+  body.light pre{background:#0e0e14;color:#d6d6e0}
+  body.light pre .c{color:#8a8a98}
+  body.light .btn{background:#FACC15}
+  body.light .step .b{background:#FACC15}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:Sora,sans-serif;line-height:1.15;margin:0}
+  a{color:var(--amb);text-decoration:none}
+  code,pre{font-family:"JetBrains Mono",monospace}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 22px}
+  .mut{color:var(--mut)} .amb{color:var(--amb)}
+  .chip{display:inline-block;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amb);font-weight:600;font-family:Sora}
+  nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(12px);background:rgba(12,12,16,.78);border-bottom:1px solid var(--line)}
+  body.light nav{background:rgba(246,247,249,.85)}
+  nav .wrap{display:flex;align-items:center;gap:20px;height:60px}
+  nav .brand{display:flex;align-items:center;gap:8px;font-family:Sora;font-weight:800;letter-spacing:-.02em;color:var(--amb);white-space:nowrap}
+  nav .brand .emoji{font-size:1.25rem}
+  nav .sep{color:var(--mut);opacity:.45}
+  nav .inema{color:var(--sky);font-weight:600;font-size:.88rem;font-family:Sora}
+  nav .inema:hover{filter:brightness(1.15)}
+  nav .pro{color:var(--pro);font-weight:600;font-size:.88rem;font-family:Sora}
+  nav .pro:hover{filter:brightness(1.15)}
+  nav .clubpro{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  nav .links{margin-left:auto;display:flex;align-items:center;gap:16px;font-size:.9rem;white-space:nowrap}
+  nav .links a.sec{color:var(--mut)} nav .links a.sec:hover{color:var(--txt)}
+  .lang{display:inline-flex;gap:2px;font-family:Sora;font-size:.78rem}
+  .lang a{color:var(--mut);padding:.2em .45em;border-radius:6px} .lang a.on{color:var(--amb);background:rgba(250,204,21,.12)}
+  .tgl{background:var(--bg2);border:1px solid var(--line);color:var(--txt);width:38px;height:38px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem}
+  .tgl:hover{border-color:var(--amb)}
+  .btn{display:inline-block;background:var(--amb);color:#1a1206;font-weight:600;padding:.6em 1.05em;border-radius:10px;font-family:Sora}
+  .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  @media(max-width:1180px){nav .links a.sec{display:none}}
+  @media(max-width:520px){nav .wrap{gap:8px;padding:8px 14px;height:auto;flex-wrap:wrap} nav .links{gap:8px;margin-left:0;width:100%;justify-content:space-between} nav .btn{padding:.45em .7em;font-size:.82rem} .tgl{width:34px;height:34px}}
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  .hero .glow{position:absolute;inset:-40% -20% auto auto;width:70%;height:600px;background:radial-gradient(closest-side,rgba(250,204,21,.18),transparent 70%);pointer-events:none}
+  .hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:74px 22px}
+  .hero h1{font-size:clamp(2.1rem,4.6vw,3.3rem);font-weight:800;letter-spacing:-.025em}
+  .hero p.lead{font-size:1.18rem;color:var(--mut);margin:1.1em 0 1.6em;max-width:38ch}
+  .hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .hero figure{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px -30px #000}
+  .hero figure img{width:100%;height:auto;display:block}
+  .resumo{padding:38px 0 34px;border-bottom:1px solid var(--line)}
+  .resumo p{font-size:1.12rem;line-height:1.7;max-width:74ch;margin:.55em 0 0}
+  @media(max-width:780px){.hero .wrap{grid-template-columns:1fr;padding:48px 22px}}
+  section{padding:62px 0;border-bottom:1px solid var(--line)}
+  section h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800;letter-spacing:-.02em}
+  section .sub{color:var(--mut);margin:.6em 0 2em;max-width:62ch}
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:820px){.g3,.g4{grid-template-columns:1fr 1fr}}
+  @media(max-width:540px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h3{font-size:1.05rem;margin-bottom:.4em}
+  .card p{color:var(--mut);font-size:.92rem;margin:0}
+  .card ul{color:var(--mut);font-size:.92rem;margin:.4em 0 0;padding-left:1.1em}
+  .card li{margin:.25em 0}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 26px}
+  .flow span{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:.45em .9em;font-size:.85rem;font-family:Sora;font-weight:600}
+  .flow .arr{color:var(--amb);border:none;background:none;padding:0 .1em}
+  pre{background:#0a0a0e;border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow:auto;font-size:.86rem;line-height:1.6;color:#d6d6e0;white-space:pre-wrap;overflow-wrap:anywhere;margin:.6em 0}
+  pre .c{color:#8a8a98} pre .k{color:var(--amb2)} pre .s{color:#9ece6a}
+  .step{display:grid;grid-template-columns:46px minmax(0,1fr);gap:16px;margin-bottom:26px}
+  .step>div,.card,.pad>div{min-width:0}
+  p code,li code,td code{overflow-wrap:anywhere}
+  .step .b{width:46px;height:46px;border-radius:12px;background:var(--amb);color:#1a1206;font-family:Sora;font-weight:800;font-size:1.25rem;display:flex;align-items:center;justify-content:center}
+  .step h3{font-size:1.12rem;margin-bottom:.3em}
+  .step p{color:var(--mut);margin:.2em 0 .7em}
+  .tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+  .tbl th,.tbl td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  .tbl tr:last-child td{border-bottom:0}
+  .tbl th{font-family:Sora;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+  .note{border-left:3px solid var(--amb);background:var(--bg2);padding:14px 16px;border-radius:0 12px 12px 0;color:var(--txt);font-size:.95rem;margin-top:22px}
+  body.light .note{border-left-color:#EAB308;background:#FEF9C3}
+  .note a,.src a{text-decoration:underline}
+  body.light a{color:#854d0e}
+  body.light .btn{color:#1a1206}
+  body.light nav .inema{color:var(--sky)} body.light nav .pro{color:var(--pro)}
+  body.light .lang a{color:var(--mut)} body.light .lang a.on{color:#854d0e}
+  body.light nav .links a.sec{color:var(--mut)}
+  body.light .note a, body.light .src a{text-decoration-color:#FACC15;text-decoration-thickness:3px}
+  .src{font-size:.88rem;color:var(--mut);margin-top:12px}
+  .bad{color:var(--bad);font-family:Sora;font-weight:600}
+  .ok{color:var(--ok);font-family:Sora;font-weight:600}
+  .pad{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px 34px}
+  .pad .head{grid-column:1/-1;display:flex;gap:14px;align-items:center;margin-bottom:6px}
+  .pad .head .n{flex:0 0 46px;width:46px;height:46px;border-radius:12px;background:rgba(250,204,21,.14);color:var(--amb);font-family:Sora;font-weight:800;font-size:1.3rem;display:flex;align-items:center;justify-content:center}
+  body.light .pad .head .n{background:#FEF9C3;color:#1a1a22}
+  .pad .head h3{font-size:1.25rem}
+  .pad .head p{margin:.2em 0 0;color:var(--mut);font-size:.95rem}
+  .pad h4{font-family:Sora;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:14px 0 6px}
+  .pad p,.pad li{font-size:.95rem}
+  .pad p{margin:0 0 .6em}
+  .pad ul{margin:0;padding-left:1.15em}
+  .pad li{margin:.3em 0}
+  @media(max-width:820px){.pad{grid-template-columns:1fr}}
+  .bigs{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 4px}
+  .big{flex:1 1 130px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .big b{display:block;font-family:Sora;font-weight:800;font-size:1.55rem;line-height:1.1;color:var(--txt)}
+  .big span{display:block;font-size:.84rem;color:var(--mut);margin-top:4px;line-height:1.4}
+  .bars{margin:10px 0 4px}
+  .bars div{display:flex;align-items:center;gap:10px;font-size:.88rem;color:var(--mut);margin:6px 0}
+  .bars i{display:block;height:16px;border-radius:4px;background:var(--mut);opacity:.55}
+  .bars i.on{background:var(--amb);opacity:1}
+  body.light .bars i.on{background:#FACC15}
+  .bars b{font-family:Sora;color:var(--txt);white-space:nowrap}
+  .ex{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:680px){.ex{grid-template-columns:1fr}}
+  figure.shot{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--card)}
+  figure.shot img{width:100%;height:auto;display:block}
+  figure.shot figcaption{padding:12px 14px;font-size:.9rem;color:var(--mut)}
+  figure.shot figcaption strong{color:var(--txt)}
+  .demo{--amostra-fundo:var(--card);--amostra-texto:var(--txt);--amostra-borda:var(--line);--amostra-destaque:#FACC15;--amostra-destaque-texto:#1a1206;--amostra-raio:14px}
+  .two{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:26px;align-items:start}
+  @media(max-width:900px){.two{grid-template-columns:1fr}}
+  ol.q{margin:.4em 0 0;padding-left:1.3em} ol.q li{margin:.45em 0}
+  ul.lim{padding-left:1.2em;margin:0;max-width:78ch} ul.lim li{margin:.6em 0}
+  footer{padding:46px 0;text-align:center;color:var(--mut);font-size:.9rem}
+  .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:.3em .8em;font-size:.78rem;color:var(--mut);margin:0 4px 6px}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="brand" href="#top"><span class="emoji">📐</span> site-que-vende</a>
+  <span class="sep">|</span>
+  <span class="clubpro">
+    <a class="inema" href="https://inema.club" target="_blank" rel="noopener">INEMA.CLUB</a>
+    <span class="sep">-</span>
+    <a class="pro" href="https://inema.pro" target="_blank" rel="noopener">PRO</a>
+  </span>
+  <div class="links">
+    <a class="sec" href="#padroes">The 5 patterns</a>
+    <a class="sec" href="#antes-depois">Before and after</a>
+    <a class="sec" href="#guia">Use</a>
+    <a class="sec" href="#amostras">Samples</a>
+    <a class="sec" href="#processo">Process</a>
+    <a class="sec" href="#limites">Limitations</a>
+    <span class="lang"><a href="../">PT</a><a class="on" href="./">EN</a><a href="../es/">ES</a></span>
+    <button class="tgl" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">🌙</button>
+    <a class="btn" href="https://github.com/inematds/site-que-vende" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</div></nav>
+
+<header class="hero" id="top">
+  <div class="glow"></div>
+  <div class="wrap">
+    <div>
+      <span class="chip">INEMA kit · website auditor</span>
+      <h1>Did your AI-built website turn out beautiful and still <span class="amb">look cheap</span>?</h1>
+      <p class="lead">It’s always the same 5 reasons. This kit measures all 5 on your page and tells you what to fix.</p>
+      <div class="cta">
+        <a class="btn" href="#guia">Start the guide</a>
+        <a class="btn ghost" href="https://github.com/inematds/site-que-vende" target="_blank" rel="noopener">View on GitHub</a>
+      </div>
+    </div>
+    <figure><img src="../assets/banner-en.jpg" alt="site-que-vende banner: the 5 patterns measured on your page" width="1400" height="788"></figure>
+  </div>
+</header>
+
+<section id="resumo" class="resumo"><div class="wrap">
+  <span class="chip">In short</span>
+  <p>site-que-vende is a kit that measures five patterns in a browser that distinguish a site that brings in customers from a site that looks “pretty and cheap” and was made with AI, then tells you what to fix. It’s for people who own a small business or build sites for small businesses. The kit opens your page on desktop and phone, measures text, color, layers, motion, and free sample, then returns a report with a list of fixes ready to paste into your coding agent (the AI program that edits files for you). To use it, you need Node.js and a terminal.</p>
+</div></section>
+
+<section id="oque"><div class="wrap">
+  <span class="chip">What it is</span>
+  <h2>An auditor that measures instead of giving opinions</h2>
+  <p class="sub">A trained eye gets tired and disagrees. The auditor opens the actual page at 1440×900 and 390×844, then measures it the same way every time.</p>
+  <figure style="margin:0 0 26px;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px -30px #000"><img src="../assets/banner-grade-en.jpg" alt="The five patterns: mirror, highlighter, layers, motion, and free sample, plus the auditor" loading="lazy" width="1400" height="788" style="width:100%;height:auto;display:block"></figure>
+  <div class="grid g3">
+    <div class="card"><h3>📏 Measures the rendered page</h3><p>First screen text, where the button's accent color appears, layers, what moves, and whether visitors have something to try. The score ranges from <code>0 de 5</code> to <code>5 de 5</code>.</p></div>
+    <div class="card"><h3>🧾 Provides a fix list</h3><p>Along with a report you can open in a browser, it saves <code>consertar.md</code>: what failed and what to do, ready to paste into Claude Code, Codex, or Cursor.</p></div>
+    <div class="card"><h3>🧮 Includes a ready-to-use free sample</h3><p>One file, <code>amostra.js</code>, with a calculator and quiz configured with JSON. No dependencies, no network, no data collection.</p></div>
+  </div>
+
+  <h3 style="margin:34px 0 12px;font-size:1.1rem">What’s in the repository</h3>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>Component</th><th>File</th><th>What it does</th></tr>
+    <tr><td>Auditor</td><td><code>skill/site-que-vende/scripts/auditar.js</code></td><td>opens the page (URL or file), measures the 5 patterns, saves <code>relatorio.html</code>, <code>relatorio.json</code>, <code>consertar.md</code>, and screenshots</td></tr>
+    <tr><td>Measurements</td><td><code>skill/site-que-vende/scripts/medir.js</code></td><td>the code that runs inside the page (color, button, layers, motion, sample)</td></tr>
+    <tr><td>Samples</td><td><code>skill/site-que-vende/amostras/amostra.js</code></td><td><code>&lt;amostra-calculadora&gt;</code> and <code>&lt;amostra-quiz&gt;</code>: one file, no dependencies, configured with JSON</td></tr>
+    <tr><td>Skill</td><td><code>skill/site-que-vende/SKILL.md</code></td><td>the 5 steps for the agent: brief, measure, fix, measure again, human review</td></tr>
+    <tr><td>Brief</td><td><code>skill/site-que-vende/referencias/brief.md</code></td><td>the questions to ask before design and the ready-to-paste request</td></tr>
+    <tr><td>Examples</td><td><code>exemplos/ruim/</code> and <code>exemplos/bom/</code></td><td>the same fictional business: one fails all 5, the other passes all 5</td></tr>
+    <tr><td>Tests</td><td><code>tests/rodar.sh</code></td><td>checks that the bad example fails for the right reason, the good example passes, and the samples work</td></tr>
+  </table></div>
+</div></section>
+
+<section id="padroes"><div class="wrap">
+  <span class="chip">The 5 patterns</span>
+  <h2>The five reasons, one by one</h2>
+  <p class="sub">For each pattern: the idea, the test number, what the auditor measures, and how to fix it. The numbers come from tests published by the people who ran them. When a number comes from a tool vendor, that is stated.</p>
+
+  <div class="pad" id="p1">
+    <div class="head"><div class="n">1</div><div><h3>Mirror test</h3><p>The first screen says who it is for, what they get, and what to do next.</p></div></div>
+    <div>
+      <h4>The idea</h4>
+      <p>When the right person lands on the first screen, they need to see themselves: their problem, their world, and a clear sign they are in the right place.</p>
+      <h4>What the tests showed</h4>
+      <p>A job page for truck drivers was rebuilt around the drivers after they were interviewed: half accessed it on a phone, the headline offered no benefit, and the photo was a stock image of a handshake.</p>
+      <div class="bars">
+        <div><i style="width:36%"></i><b>12.1%</b> before</div>
+        <div><i class="on" style="width:65%"></i><b>21.7%</b> after (79.3% better)</div>
+      </div>
+      <div class="bigs">
+        <div class="big"><b>+90%</b><span>more clicks to the pricing page after changing "Companies grow faster online" to "Create a page for your business"</span></div>
+        <div class="big"><b>+31.4%</b><span>more conversions when the headline repeated the word the person had searched for</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>What the auditor measures</h4>
+      <ul>
+        <li>whether there is a headline on the first screen and whether it is not a phrase that could fit any company;</li>
+        <li>whether the headline is 16 words or fewer;</li>
+        <li>whether there is ONE primary button on the first screen, on desktop (1440×900) and phone (390×844);</li>
+        <li>whether the button text says what happens (not "Learn more", "Submit");</li>
+        <li>whether a second prominent button competes with it.</li>
+      </ul>
+      <h4>How to fix it</h4>
+      <ul>
+        <li>Rewrite it using the answers in the brief. Put the result in the headline, not a feature.</li>
+        <li>One button, one action, on the first screen, right below the headline.</li>
+        <li>On a phone, shorten what comes before so the button fits within 390 px.</li>
+      </ul>
+      <p class="src">It does not measure whether the copy is true or speaks to the right person. That is why it returns the three human review questions.</p>
+    </div>
+  </div>
+
+  <div class="pad" id="p2">
+    <div class="head"><div class="n">2</div><div><h3>Highlighter rule</h3><p>The accent color appears only on clickable elements.</p></div></div>
+    <div>
+      <h4>The idea</h4>
+      <p>If you highlight a line in a book, you can find it in two seconds. If you highlight everything, you have highlighted nothing. AI puts the accent color on the headline, icons, border, background, and button. Then the button disappears.</p>
+      <h4>The numbers</h4>
+      <div class="bigs">
+        <div class="big"><b>60 / 30 / 10</b><span>60% background, 30% structure (text, menu, cards), 10% accent, used only on buttons and links</span></div>
+        <div class="big"><b>2</b><span>the maximum number of times the button color can appear on non-clickable elements, according to the auditor</span></div>
+        <div class="big"><b>15%</b><span>of the page covered by the accent color: above that, it fails</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>What the auditor measures</h4>
+      <ul>
+        <li>the color of the primary button;</li>
+        <li>how many non-clickable elements use it (headline, text, icon, border, background);</li>
+        <li>whether the button stands out from the background around it;</li>
+        <li>how much of the page is covered by the accent color and how much by the background color.</li>
+      </ul>
+      <h4>How to fix it</h4>
+      <ul>
+        <li>Use only three colors.</li>
+        <li>Remove the button color from headlines, icons, borders, and backgrounds. Use the text color and structure color for everything else.</li>
+      </ul>
+      <p class="src">The image <code>desktop-marca-texto.png</code> marks each incorrect use. See a real example in <a href="#antes-depois">Before and after</a>.</p>
+    </div>
+  </div>
+
+  <div class="pad" id="p3">
+    <div class="head"><div class="n">3</div><div><h3>Front, middle and back</h3><p>Scene in back, content in the middle, button in front.</p></div></div>
+    <div>
+      <h4>The idea</h4>
+      <p>On a cheap-looking site, everything is flat on the same plane, and your eye does not know where to start. On a stage, there is the painted backdrop, the furniture, and the actor. On a site: background (photo or shape), middle (the content), front (the button).</p>
+      <h4>The numbers</h4>
+      <div class="bigs">
+        <div class="big"><b>1</b><span>at least one element crossing the boundary between two sections</span></div>
+        <div class="big"><b>0</b><span>elements with shadows: everything on the same plane, fail</span></div>
+        <div class="big"><b>more than 6</b><span>shadows, and on more than half the boxes: shadows everywhere, fail</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>What the auditor measures</h4>
+      <ul>
+        <li>whether the first screen has a photo, video, shape, or gradient behind the text;</li>
+        <li>how many elements cross the boundary between two sections;</li>
+        <li>how many elements have shadows.</li>
+      </ul>
+      <h4>How to fix it</h4>
+      <ul>
+        <li>Put something real in the background of the first screen: a photo of the work or product, or a soft shape.</li>
+        <li>Have ONE element (card or image) extend halfway into the section below.</li>
+        <li>Use shadows only where they matter: on the button and one card.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="pad" id="p4">
+    <div class="head"><div class="n">4</div><div><h3>Motion with a purpose</h3><p>Text ready instantly, one thing moves per screen, and motion can be turned off.</p></div></div>
+    <div>
+      <h4>The idea</h4>
+      <p>Animation is the fastest way for a site to look expensive, and also the fastest way for it to look AI-generated. Every animation needs a job: show the product, point to the next step, or show what just happened.</p>
+      <h4>What the studies showed</h4>
+      <ul>
+        <li>Motion draws the eye. That is both its advantage and its downside: it pulls attention away from what the person came to do.</li>
+        <li>A university study tested the same site with and without parallax (a background that moves at a different speed as you scroll): people found the parallax version more fun and more professional-looking, but the overall user experience did not improve.</li>
+      </ul>
+      <div class="bigs">
+        <div class="big"><b>1 in 3</b><span>adults over 40 in an American survey had some sign of inner ear dysfunction (balance). That is why phones and desktops have a "reduce motion" option.</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>What the auditor measures</h4>
+      <ul>
+        <li>whether the headline and button are readable 0.4 s after the page loads;</li>
+        <li>how many things change opacity, position, clipping, or filters on each screen, while scrolling and at rest: fails at 4 or more, warns at 2 or 3;</li>
+        <li>how many keep moving with <code>prefers-reduced-motion: reduce</code>: it must be zero.</li>
+      </ul>
+      <h4>How to fix it</h4>
+      <ul>
+        <li>Show the first screen's headline, text, and button ready to read, without an entrance animation.</li>
+        <li>Let one thing move per screen. Keep everything else still.</li>
+        <li>Inside <code>@media (prefers-reduced-motion: reduce)</code>, turn everything off.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="pad" id="p5">
+    <div class="head"><div class="n">5</div><div><h3>Free sample</h3><p>Visitors try the result before sharing their contact information.</p></div></div>
+    <div>
+      <h4>The idea</h4>
+      <p>Almost every site explains everything and gives you a form. Better: let people try the result before asking them for anything. We value more what we helped build. When someone enters their own numbers, the result belongs to them.</p>
+      <h4>The number</h4>
+      <div class="bigs">
+        <div class="big"><b>close to 45%</b><span>conversion on a calculator for the price of an orthodontic appliance on an orthodontist's site, according to the company that made the tool (vendor figure, not an independent study)</span></div>
+        <div class="big"><b>7</b><span>steps or fields: above that, the auditor fails it because people do not reach the end</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>What the auditor measures</h4>
+      <ul>
+        <li>whether there is a tool that is not a contact form;</li>
+        <li>whether it changes the result on screen when someone interacts with it (it changes the controls and clicks);</li>
+        <li>its size: how many steps or fields.</li>
+      </ul>
+      <h4>How to fix it</h4>
+      <ul>
+        <li>Find the question every customer asks before buying ("How much does it cost?", "Which one is right for me?").</li>
+        <li>Answer with a quiz, a calculator, or a useful tool. The <a href="#amostras">ready-made samples</a> handle the first two.</li>
+        <li>The calculator's numbers come from the business owner.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="antes-depois"><div class="wrap">
+  <span class="chip">Before and after</span>
+  <h2>The same business: 0 de 5 and 5 de 5</h2>
+  <p class="sub">Both pages are for a fictional scheduling business for hair stylists. The photos below were taken by the auditor itself.</p>
+  <div class="ex">
+    <figure class="shot"><img src="../assets/ruim-tela1.jpg" alt="First screen of the bad example: generic purple headline, no button in sight" loading="lazy" width="1000" height="625"><figcaption><strong class="bad">0 de 5.</strong> A headline that could fit any business, the button color everywhere, and no button on the first screen. (Screenshot in Portuguese.) <a href="https://inematds.github.io/site-que-vende/exemplos/ruim/" target="_blank" rel="noopener">Open the bad example</a></figcaption></figure>
+    <figure class="shot"><img src="../assets/bom-tela1.jpg" alt="First screen of the good example: headline focused on the benefit, one orange button, salon photo in the background, and a card crossing the edge" loading="lazy" width="1000" height="625"><figcaption><strong class="ok">5 de 5.</strong> The benefit in the headline, one button, a real photo in the background, and a card crossing the edge. (Screenshot in Portuguese.) <a href="https://inematds.github.io/site-que-vende/exemplos/bom/" target="_blank" rel="noopener">Open the good example</a></figcaption></figure>
+  </div>
+
+  <h3 style="margin:34px 0 12px;font-size:1.1rem">What the auditor measured on both</h3>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>Measure</th><th>Bad example</th><th>Good example</th></tr>
+    <tr><td>Headline</td><td>"Soluções inovadoras de agendamento com IA" (Innovative AI scheduling solutions)</td><td>"Encha sua agenda sem responder mensagem." (Fill your schedule without replying to messages.)</td></tr>
+    <tr><td>Main button</td><td>"Enviar" (Send), below the first screen</td><td>"Ver quanto meu horário vago custa" (See how much my open time costs), on the first screen on desktop and phone</td></tr>
+    <tr><td>Button color outside a click</td><td><span class="bad">35 places</span></td><td><span class="ok">0</span></td></tr>
+    <tr><td>First screen background</td><td>solid color</td><td>background image</td></tr>
+    <tr><td>Items crossing a section edge</td><td><span class="bad">0</span></td><td><span class="ok">1</span></td></tr>
+    <tr><td>Elements with a shadow</td><td><span class="bad">0</span></td><td><span class="ok">3</span></td></tr>
+    <tr><td>Things moving on the same screen</td><td><span class="bad">4</span></td><td><span class="ok">1</span></td></tr>
+    <tr><td>Moving with "reduce motion" enabled</td><td><span class="bad">4</span></td><td><span class="ok">0</span></td></tr>
+    <tr><td>Free sample</td><td>no: just a contact form</td><td><code>amostra-calculadora</code>, 2 fields, responds right away</td></tr>
+  </table></div>
+
+  <div class="ex" style="margin-top:26px">
+    <figure class="shot"><img src="../assets/marca-texto.jpg" alt="Highlighter map of the bad example: every place where the button color appears outside a click is outlined" loading="lazy" width="1000" height="1125"><figcaption><strong>The highlighter map.</strong> In the bad example, the auditor outlined all 35 places where the button color appears without being clickable: 9 borders, 11 text elements, 11 headlines, and 4 icons or badges. (Screenshot in Portuguese.)</figcaption></figure>
+    <figure class="shot"><img src="../assets/relatorio.jpg" alt="Excerpt from relatorio.html of the bad example: 0 de 5, with the list of failures and fixes for pattern 1" loading="lazy" width="1000" height="745"><figcaption><strong>The report.</strong> <code>relatorio.html</code> shows the score, each measured failure, what to do, and the measurements one by one. (Screenshot in Portuguese.)</figcaption></figure>
+  </div>
+</div></section>
+
+<section id="guia"><div class="wrap">
+  <span class="chip">User guide · step by step</span>
+  <h2>Use it in 2 minutes</h2>
+  <p class="sub">You need <a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a> and git installed. These commands are for the bash or zsh terminal (Linux and Mac; on Windows, use WSL).</p>
+  <p class="src">To check: <code>node -v</code> and <code>git --version</code> must return a version number. WSL is the Linux terminal Microsoft offers within Windows (<a href="https://learn.microsoft.com/windows/wsl/install" target="_blank" rel="noopener">how to install it</a>). From step 2 onward, run the commands from inside the <code>site-que-vende</code> folder.</p>
+
+  <div class="step"><div class="b">1</div><div>
+    <h3>Download the kit and install the test browser</h3>
+    <p>The auditor uses Playwright to control its own Chromium browser. You only need to install it once.</p>
+<pre>git clone https://github.com/inematds/site-que-vende && cd site-que-vende
+cd skill/site-que-vende/scripts && npm install && npx playwright install chromium && cd -</pre>
+  </div></div>
+
+  <div class="step"><div class="b">2</div><div>
+    <h3>Measure your page</h3>
+    <p>Pass the website address or the path to an HTML file. The report goes in the <code>--saida</code> folder.</p>
+<pre>node skill/site-que-vende/scripts/auditar.js https://seusite.com.br --saida auditoria</pre>
+    <p>With a file instead of an address:</p>
+<pre>node skill/site-que-vende/scripts/auditar.js minha-pagina/index.html --saida auditoria</pre>
+  </div></div>
+
+  <div class="step"><div class="b">3</div><div>
+    <h3>Read the result</h3>
+    <p>This is the actual output for this repository’s bad example (<code>node skill/site-que-vende/scripts/auditar.js exemplos/ruim/index.html --saida auditoria</code>):</p>
+<pre>site-que-vende · exemplos/ruim/index.html
+
+FALHA  1. Teste do espelho
+         - Título genérico: "Soluções inovadoras de agendamento com IA" serve para qualquer empresa (casou com /solu[çc][õo]es? (inovador|inteligent|completa|digita)/i).
+         - O botão principal ("Enviar") não aparece na primeira tela do computador.
+         - No celular, o botão principal não aparece na primeira tela.
+         - O botão diz "Enviar": não conta o que acontece depois do clique.
+FALHA  2. Regra do marca-texto
+         - A cor do botão (#8b5cf6) aparece em 35 lugares que não são clique (9 borda, 11 texto, 11 título, 4 ícone ou selo). Veja desktop-marca-texto.png.
+FALHA  3. Frente, meio e fundo
+         - A primeira tela é uma caixa de cor lisa: não há foto, forma nem degradê atrás do texto.
+         - Nenhuma peça atravessa a borda de uma seção: a página é uma pilha de caixas.
+         - Nenhum elemento tem sombra: tudo está no mesmo plano.
+FALHA  4. Movimento com função
+         - O título não está legível 0,4 s depois de a página abrir (opacidade 0.38): o visitante espera a animação.
+         - 4 coisas se movem ao mesmo tempo na tela 2 (div.cartao, div.cartao, div.cartao, div.cartao).
+         - Com "reduzir movimento" ligado no aparelho, 4 elemento(s) continuam se movendo.
+FALHA  5. Amostra grátis
+         - A página explica e entrega um formulário de contato: não há nada para o visitante experimentar.
+
+0 de 5 padrões passam.  Relatório: auditoria/relatorio.html
+O que consertar (cole no seu agente): auditoria/consertar.md</pre>
+<p class="note">The auditor’s messages, <code>relatorio.html</code>, and <code>consertar.md</code> are in Portuguese. The same output is translated below for reference. You can paste <code>consertar.md</code> as is into your agent and ask it to respond in your language.</p>
+<pre class="tr">site-que-vende · exemplos/ruim/index.html
+
+FAIL  1. Mirror test
+         - Generic title: "Soluções inovadoras de agendamento com IA" could apply to any company (matched /solu[çc][õo]es? (inovador|inteligent|completa|digita)/i).
+         - The main button ("Enviar") does not appear on the desktop's first screen.
+         - On the phone, the main button does not appear on the first screen.
+         - The button says "Enviar": it doesn't tell you what happens after you click it.
+FAIL  2. Highlighter rule
+         - The button's accent color (#8b5cf6) appears in 35 places that are not clickable (9 border, 11 text, 11 title, 4 icon or badge). See desktop-marca-texto.png.
+FAIL  3. Front, middle and back
+         - The first screen is a solid-color box: there's no photo, shape, or gradient behind the text.
+         - No element crosses a section boundary: the page is a stack of boxes.
+         - No element has a shadow: everything is on the same plane.
+FAIL  4. Motion with a purpose
+         - The title isn't readable 0.4 s after the page opens (opacity 0.38): the visitor has to wait for the animation.
+         - 4 things move at the same time on screen 2 (div.cartao, div.cartao, div.cartao, div.cartao).
+         - With “reduce motion” enabled on the device, 4 element(s) keep moving.
+FAIL  5. Free sample
+         - The page explains and provides a contact form: there's nothing for the visitor to try.
+
+0 of 5 patterns pass.  Report: auditoria/relatorio.html
+What to fix (paste into your agent): auditoria/consertar.md</pre>
+    <p>The opacity number on the pattern 4 line changes slightly with each run because it depends on the time of the measurement. The snippet "matched /.../" is the internal rule that recognized the generic title: you can ignore it.</p>
+    <p>The <code>auditoria/</code> folder contains: <code>relatorio.html</code> (to open in a browser), <code>relatorio.json</code> (the measurements), <code>consertar.md</code> (the to-do list), and the screenshots <code>desktop-tela1.png</code>, <code>celular-tela1.png</code>, <code>desktop-pagina.png</code>, and <code>desktop-marca-texto.png</code>.</p>
+    <p>Exit code: <code>0</code> means all five passed, <code>1</code> means at least one failed, and <code>2</code> means a usage error. This works in CI (the automated check that runs whenever the code changes).</p>
+  </div></div>
+
+  <div class="step"><div class="b">4</div><div>
+    <h3>Fix only what failed</h3>
+    <p>Paste <code>auditoria/consertar.md</code> into your coding agent along with the page. The order follows patterns 1 through 5: text before color, color before layering. Without an agent, open <code>relatorio.html</code> and fix things by hand. Each failure tells you what to do.</p>
+  </div></div>
+
+  <div class="step"><div class="b">5</div><div>
+    <h3>Measure again until you get 5 out of 5</h3>
+    <p>Repeat steps 2 through 4. Don’t change the auditor or the rules to pass. If a pattern still fails after 3 rounds, stop and check the measurement. It may be your decision.</p>
+  </div></div>
+
+  <div class="step"><div class="b">6</div><div>
+    <h3>Do a human review before publishing</h3>
+    <p>The auditor doesn’t judge the text. Look at <code>auditoria/desktop-tela1.png</code> and <code>auditoria/celular-tela1.png</code>, then answer the three questions at the end of <code>consertar.md</code>:</p>
+    <ul class="mut" style="margin:0;padding-left:1.2em">
+      <li>Who is it for? (Does the right visitor recognize themselves in the headline?)</li>
+      <li>What do I gain? (Is it a result, not a feature?)</li>
+      <li>What should I do now? (One button, one action?)</li>
+    </ul>
+  </div></div>
+
+  <h3 id="skill" style="margin:40px 0 8px;font-size:1.25rem">Using the skill in Claude Code</h3>
+  <p class="sub" style="margin-bottom:1em">A skill is a folder with a <code>SKILL.md</code> file: the instructions the agent follows. This kit’s skill tells the agent to create the brief, measure, fix, measure again, then stop for your review.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Install and load</h3>
+      <p>From inside the kit folder, create the shortcut in Claude Code’s skills folder:</p>
+<pre>mkdir -p ~/.claude/skills
+ln -s "$PWD/skill/site-que-vende" ~/.claude/skills/site-que-vende</pre>
+      <p>Claude Code reads <code>~/.claude/skills/site-que-vende/SKILL.md</code> when a session starts. Open a new session and ask: "audit my site with site-que-vende" or "why isn’t my site converting?". If it doesn’t load automatically, say: "read <code>~/.claude/skills/site-que-vende/SKILL.md</code> and follow the steps".</p>
+    </div>
+    <div class="card">
+      <h3>In another agent, or without an agent</h3>
+      <p>In Codex or Cursor, open the kit folder and say: "read <code>skill/site-que-vende/SKILL.md</code> and follow the steps".</p>
+      <p style="margin-top:.7em">Without an agent, follow the six steps above. The auditor and samples work on their own, and <code>relatorio.html</code> tells you what to do for each failure.</p>
+      <p style="margin-top:.7em">To check the kit: <code>bash tests/rodar.sh</code> must finish with <code>TUDO OK</code>.</p>
+    </div>
+  </div>
+
+  <div class="note"><strong>What never to do to pass.</strong> Make up a testimonial, number, client, award, or badge. Put <code>data-cta</code> on a hidden button or hide elements just to pass the auditor. Change the text the site owner wrote when it already answers the three questions. Ask for an email before showing the sample result.</div>
+</div></section>
+
+<section id="amostras"><div class="wrap">
+  <span class="chip">Free samples</span>
+  <h2>Ready-to-paste calculator and quiz</h2>
+  <p class="sub">Copy <code>skill/site-que-vende/amostras/amostra.js</code> to your site, paste the tag, and replace the JSON with your business numbers. Nothing is sent to any server.</p>
+
+  <div class="two">
+    <div>
+      <h3 style="font-size:1.05rem;margin-bottom:.4em">The snippet to paste</h3>
+<pre>&lt;amostra-calculadora&gt;
+  &lt;script type="application/json"&gt;
+  { "titulo": "Quanto custa pintar a sua casa?", "base": 350,
+    "campos": [
+      {"rotulo": "Área de parede", "tipo": "faixa", "min": 20, "max": 300, "passo": 10, "valor": 80, "unidade": "m²", "porUnidade": 28},
+      {"rotulo": "Acabamento", "tipo": "opcoes", "opcoes": [{"rotulo": "Econômico", "vezes": 1}, {"rotulo": "Premium", "vezes": 1.6}]}
+    ],
+    "margem": 12, "prefixo": "Sua pintura fica entre",
+    "botao": {"texto": "Receber o orçamento exato", "href": "#contato"} }
+  &lt;/script&gt;
+&lt;/amostra-calculadora&gt;
+&lt;script src="amostra.js"&gt;&lt;/script&gt;</pre>
+      <p class="mut" style="font-size:.95rem">The button’s color comes from your page:</p>
+<pre>:root { --amostra-destaque: #c2410c; }</pre>
+      <p class="mut" style="font-size:.95rem">You can also adjust <code>--amostra-fundo</code>, <code>--amostra-texto</code>, <code>--amostra-borda</code>, and <code>--amostra-raio</code>. The sample inherits the page’s font and has no animation.</p>
+    </div>
+    <div class="demo">
+      <h3 style="font-size:1.05rem;margin-bottom:.6em">See it in action</h3>
+      <amostra-calculadora>
+        <script type="application/json">
+        {
+          "titulo": "How much does it cost to paint your house?",
+          "subtitulo": "Get an estimate instantly, no sign-up required.",
+          "base": 350,
+          "campos": [
+            {
+              "rotulo": "Wall area",
+              "tipo": "faixa",
+              "min": 20,
+              "max": 300,
+              "passo": 10,
+              "valor": 80,
+              "unidade": "m²",
+              "porUnidade": 28
+            },
+            {
+              "rotulo": "Finish",
+              "tipo": "opcoes",
+              "opcoes": [
+                {
+                  "rotulo": "Economy",
+                  "vezes": 1
+                },
+                {
+                  "rotulo": "Standard",
+                  "vezes": 1.25
+                },
+                {
+                  "rotulo": "Premium",
+                  "vezes": 1.6
+                }
+              ]
+            },
+            {
+              "rotulo": "Paint the ceiling too?",
+              "tipo": "opcoes",
+              "opcoes": [
+                {
+                  "rotulo": "No",
+                  "soma": 0
+                },
+                {
+                  "rotulo": "Yes",
+                  "soma": 600
+                }
+              ]
+            }
+          ],
+          "margem": 0,
+          "arredondar": 50,
+          "prefixo": "Your paint job is estimated at",
+          "sufixo": "including paint and labor",
+          "botao": {
+            "texto": "Get an exact quote",
+            "href": "#amostras"
+          },
+          "nota": "Sample prices: replace them with your own.",
+          "idioma": "en",
+          "moeda": "USD"
+        }
+        </script>
+      </amostra-calculadora>
+      <p class="src">Adjust the area and finish: the result changes right away. That’s what pattern 5 measures. <a href="../../skill/site-que-vende/amostras/exemplo.html">See the quiz and calculator on the sample page</a> (in Portuguese).</p>
+    </div>
+  </div>
+
+  <h3 style="margin:34px 0 12px;font-size:1.1rem">What you can configure in the JSON</h3>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>Tag</th><th>Keys</th><th>How it works</th></tr>
+    <tr><td><code>&lt;amostra-calculadora&gt;</code></td><td><code>titulo</code>, <code>subtitulo</code>, <code>base</code>, <code>campos</code>, <code>margem</code>, <code>arredondar</code>, <code>prefixo</code>, <code>sufixo</code>, <code>botao</code>, <code>nota</code>, <code>moeda</code>, <code>idioma</code></td><td>result = (base + sum of fields) × multipliers, shown as a range (plus or minus the margin). A <code>"tipo": "faixa"</code> field uses <code>porUnidade</code>; with <code>"multiplica": true</code>, it acts as a multiplier. A <code>"tipo": "opcoes"</code> field uses <code>soma</code> or <code>vezes</code>.</td></tr>
+    <tr><td><code>&lt;amostra-quiz&gt;</code></td><td><code>titulo</code>, <code>perguntas</code>, <code>resultados</code>, <code>prefixo</code>, <code>refazer</code></td><td>each option adds <code>pontos</code> to one or more results; the result with the most points wins. Each result has <code>titulo</code>, <code>texto</code>, and <code>botao</code>.</td></tr>
+  </table></div>
+  <p class="note">JSON keys stay in Portuguese (<code>titulo</code>, <code>campos</code>, <code>rotulo</code>); the values are yours and can be in any language. The quiz counter ("Pergunta 1 de 3") and the separator between the calculator’s two range values (" a ") are written in Portuguese in <code>amostra.js</code>. That’s why the demo above uses <code>"margem": 0</code> and shows a single value. Labels, button text, currency (<code>moeda</code>), and number format (<code>idioma</code>) come from your JSON.</p>
+</div></section>
+
+<section id="brief"><div class="wrap">
+  <span class="chip">Brief</span>
+  <h2>The questions to answer before any design</h2>
+  <p class="sub">Answer these before asking AI to build the page, then paste your answers into the prompt. Without them, AI writes for “any business,” and no design can save it.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>The three Mirror test questions (required)</h3>
+      <ol class="q mut">
+        <li><strong style="color:var(--txt)">Who is it for?</strong> One person, not a market. “A hairstylist who works alone,” not “beauty professionals.”</li>
+        <li><strong style="color:var(--txt)">What do they gain?</strong> The result in their life, not the feature. “A full schedule without answering messages,” not “AI booking.”</li>
+        <li><strong style="color:var(--txt)">What do they do now?</strong> One action, with what happens after the click. “See available times,” not “Learn more”.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>The questions that refine the copy and colors</h3>
+      <ol class="q mut" start="4">
+        <li>What word does this person use to search for this? Use the same word in the headline.</li>
+        <li>What question does every customer ask before buying? Turn it into the free sample.</li>
+        <li>Where will they open the site: phone or desktop? On a phone, does the button fit on the first screen at 390 px?</li>
+        <li>What question or fear makes them give up? Answer it right below the button, in one line.</li>
+        <li>What photo shows their world? A photo of your work or product, never a stock photo.</li>
+        <li>What are the three colors? Background (60%), structure (30%), and accent (10%, buttons and links only).</li>
+      </ol>
+    </div>
+  </div>
+  <h3 style="margin:30px 0 8px;font-size:1.1rem">Ready-to-paste prompt</h3>
+  <p class="mut" style="margin:0 0 .4em;max-width:74ch">Replace what’s between <code>&lt; &gt;</code> with your answers. Each field’s number matches the question above.</p>
+<pre class="tr">Create the page for &lt;business&gt;.
+Who it is for: &lt;1&gt;
+What the person gains: &lt;2&gt;
+Main action (one button, marked with data-cta): &lt;3&gt;
+Word they use: &lt;4&gt;
+Free sample (answers "&lt;5&gt;"): use amostras/amostra.js with &lt;amostra-calculadora&gt; or &lt;amostra-quiz&gt;; these are the numbers: &lt;...&gt;
+Colors: background &lt;hex&gt;, structure &lt;hex&gt;, accent &lt;hex&gt; (accent only on buttons and links).
+First screen: headline, one supporting line, and the button, ready without animation, with a real photo in the background.
+One element crosses the edge of the first section. Shadow only on the button and the main card.
+At most one thing moves per screen, and nothing moves with prefers-reduced-motion: reduce.
+Do not invent a testimonial, number, or customer.
+Then run: node scripts/auditar.js index.html  and fix until you get 5 de 5.</pre>
+  <p class="src"><code>data-cta</code> is an attribute you add to the main button's HTML (<code>&lt;a data-cta href="..."&gt;</code>) to tell the auditor which one it is. Without the marker, the auditor chooses the most prominent button (size and contrast) on the first screen. The paths in the request (<code>scripts/auditar.js</code>, <code>amostras/amostra.js</code>) are relative to the kit's <code>skill/site-que-vende/</code> folder.</p>
+</div></section>
+
+<section id="processo"><div class="wrap">
+  <span class="chip">The process, from start to finish</span>
+  <h2>The 7 steps, and who does each one</h2>
+  <p class="sub">You decide what only you know. AI writes and fixes. The script measures without using tokens.</p>
+  <div class="flow">
+    <span>Brief</span><span class="arr">→</span>
+    <span>Page</span><span class="arr">→</span>
+    <span>Measure</span><span class="arr">→</span>
+    <span>Fix</span><span class="arr">→</span>
+    <span>Sample</span><span class="arr">→</span>
+    <span>Measure again</span><span class="arr">→</span>
+    <span>Human review and publish</span>
+  </div>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>#</th><th>Step</th><th>What happens</th><th>Who does it</th></tr>
+    <tr><td>1</td><td>Brief</td><td>answer the brief questions: who it’s for, what they gain, what they do now, three colors, sample question</td><td>👤 you, with 🧠 AI</td></tr>
+    <tr><td>2</td><td>Page</td><td>AI generates the page using the completed brief (or your site is already live)</td><td>🧠 AI</td></tr>
+    <tr><td>3</td><td>Measure</td><td><code>node skill/site-que-vende/scripts/auditar.js &lt;url or file&gt; --saida auditoria</code></td><td>⚙️ script</td></tr>
+    <tr><td>4</td><td>Fix</td><td>paste <code>auditoria/consertar.md</code> into the agent; it fixes only what failed, in order from 1 to 5</td><td>🧠 AI</td></tr>
+    <tr><td>5</td><td>Sample</td><td>if pattern 5 failed: copy <code>amostras/amostra.js</code> and set up the quiz or calculator with your business numbers</td><td>👤 you, with 🧠 AI</td></tr>
+    <tr><td>6</td><td>Measure again</td><td>repeat 3 and 4 until <code>5 de 5</code> (up to 3 rounds; after that, the decision is yours)</td><td>⚙️ script</td></tr>
+    <tr><td>7</td><td>Human review and publish</td><td>look at <code>desktop-tela1.png</code> and <code>celular-tela1.png</code>, answer the three mirror test questions, publish</td><td>👤 you</td></tr>
+  </table></div>
+</div></section>
+
+<section id="limites"><div class="wrap">
+  <span class="chip">Limits</span>
+  <h2>Read before you trust it</h2>
+  <p class="sub">What the auditor cannot see, in plain terms.</p>
+  <ul class="lim">
+    <li><strong>It measures form, not truth.</strong> A specific but false headline passes. That is why human review exists.</li>
+    <li><strong>Black, white, or gray primary button:</strong> pattern 2 becomes a warning because it cannot count where else the color appears.</li>
+    <li><strong>Animation made with <code>&lt;canvas&gt;</code> or WebGL</strong> counts as a single thing.</li>
+    <li><strong>Big brand websites</strong> often fail several patterns and still sell: they already have the trust that a small business website needs to earn on the first screen.</li>
+    <li><strong>Passing all five does not guarantee sales.</strong> It guarantees the site does not lose customers for the five most common reasons.</li>
+    <li><strong>A site that sells nothing</strong> (art portfolio, invitation, visual event page): patterns 1 and 5 do not apply. Run the auditor just to see the measurements.</li>
+    <li><strong>The auditor’s messages are in Portuguese.</strong> Audited pages can be in Portuguese, English, or Spanish.</li>
+  </ul>
+</div></section>
+
+<footer>
+  <div class="wrap">
+    <div class="pill">Node.js</div><div class="pill">Playwright</div><div class="pill">Skill for Claude Code</div><div class="pill">MIT License</div>
+    <p style="margin-top:18px">site-que-vende · open and free kit ·
+      <a href="https://github.com/inematds/site-que-vende">inematds/site-que-vende</a> ·
+      <a href="https://inema.club">INEMA.CLUB</a></p>
+  </div>
+</footer>
+
+<script src="../../skill/site-que-vende/amostras/amostra.js"></script>
+<script>
+  (function(){
+    var KEY='site-que-vende-theme';
+    var b=document.body, t=document.getElementById('themeToggle');
+    var salvo=null; try{ salvo=localStorage.getItem(KEY); }catch(e){}
+    if(salvo==='light'){ b.classList.add('light'); t.textContent='☀️'; }
+    t.addEventListener('click',function(){
+      var light=b.classList.toggle('light');
+      t.textContent=light?'☀️':'🌙';
+      try{ localStorage.setItem(KEY, light?'light':'dark'); }catch(e){}
+    });
+  })();
+</script>
+</body>
+</html>
