@@ -68,6 +68,11 @@ Leia `auditoria/consertar.md` e conserte **só o que falhou**, um padrão por ve
 Repita os passos 2 e 3 até sair `5 de 5`. Não mexa no auditor nem nas regras para passar.
 Se depois de 3 voltas um padrão ainda falha, pare e mostre a medida à pessoa: pode ser decisão dela.
 
+**O auditor também erra.** Antes de mexer num padrão que falhou, confira a medida contra `auditoria/desktop-tela1.png`
+(e `celular-tela1.png`): o título, o botão e a ferramenta que ele achou são os da página? Se ele errou (pegou o botão do
+aviso de cookies, um título de carrossel fora da tela, um formulário como amostra), marque o certo com `data-cta`
+quando for o botão, registre o falso positivo para a pessoa e siga. Não reescreva o que está certo para agradar o auditor.
+
 ### 5. Revisão humana
 
 O auditor não julga texto. Mostre à pessoa a primeira tela (`auditoria/desktop-tela1.png` e `celular-tela1.png`)
@@ -85,6 +90,10 @@ com as três perguntas do fim do `consertar.md` e espere a resposta antes de pub
 - Ele mede forma, não verdade: um título específico e falso passa.
 - Botão principal preto, branco ou cinza: o padrão 2 não consegue contar onde mais a cor aparece (vira aviso).
 - Animação feita em `<canvas>` ou WebGL conta como uma coisa só.
+- A lista de títulos genéricos é fixa e erra nos dois sentidos: deixa passar genérico novo e pode pegar frase concreta.
+- O padrão 5 acha a ferramenta por heurística: estimador montado em `div` sem `form`, ou formulário de pedido simples,
+  podem ser lidos errado. Confira na tela.
+- A página é aberta 4 vezes por auditoria: o que ela envia sozinha ao abrir (analytics) sai 4 vezes.
 - Site de marca grande costuma falhar em vários padrões e vender assim mesmo: ele já tem a confiança que o
   site de um negócio pequeno precisa conquistar na primeira tela.
 - Passar nos cinco não garante venda. Garante que o site não perde cliente pelos cinco motivos mais comuns.

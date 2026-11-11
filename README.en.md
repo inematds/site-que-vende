@@ -54,7 +54,8 @@ Exit code: `0` passed all five, `1` one or more failed, `2` usage error or the p
 
 What to know before running:
 
-- Each audit takes 20 to 60 seconds and writes 1 to 12 MB to `auditoria/` (screenshots and report). Add `auditoria/` to the site's `.gitignore`.
+- Each audit takes 20 to 60 seconds and writes 1 to 20 MB to `auditoria/` (screenshots and report). Add `auditoria/` to the site's `.gitignore`.
+- The page is opened 4 times (desktop and phone, with and without "reduce motion"): whatever it sends on its own when it loads, such as analytics, goes out 4 times. While it probes the sample, the auditor blocks every network request (submissions, GET with data, pixels, WebSocket) except the site's own static files. The list of generic headlines is fixed and errs both ways: check the headline yourself.
 - While testing the sample, the auditor blocks every page submission (form, `fetch`, any request that isn't GET) and every attempt to reach another address. Nothing is sent to the site, and the report lists what was blocked.
 - The auditor scrolls the page and **interacts with the sample's controls** (sliders, options, buttons) to see if it responds. It **does not submit forms or follow links**.
 - **Which is the main button?** It picks the largest filled button on the first screen and says which one it picked in the report. If it picked the wrong one, mark the right one in the HTML with the `data-cta` attribute (`<a data-cta href="...">`), or, on a site you cannot edit, run with `--cta "css-selector"`.

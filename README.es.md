@@ -54,7 +54,8 @@ Código de salida: `0` pasó las cinco pruebas, `1` falló alguna, `2` error de 
 
 Qué debes saber antes de ejecutar:
 
-- Cada auditoría tarda de 20 a 60 segundos y guarda de 1 a 12 MB en `auditoria/` (capturas e informe). Agrega `auditoria/` al `.gitignore` del sitio.
+- Cada auditoría tarda de 20 a 60 segundos y guarda de 1 a 20 MB en `auditoria/` (capturas e informe). Agrega `auditoria/` al `.gitignore` del sitio.
+- La página se abre 4 veces (computadora y celular, con y sin "reducir movimiento"): lo que envía sola al abrir, como analytics, sale 4 veces. Al probar la muestra, el auditor bloquea todo pedido de red (envíos, GET con datos, píxeles, WebSocket), salvo los archivos estáticos del propio sitio. La lista de títulos genéricos es fija y se equivoca en los dos sentidos: revisa el título tú mismo.
 - Mientras prueba la muestra, el auditor bloquea todos los envíos de la página (formularios, `fetch`, cualquier solicitud que no sea GET) y cualquier intento de conectarse a otra dirección. No se envía nada al sitio y el informe enumera lo que se bloqueó.
 - El auditor recorre la página e **interactúa con los controles** de la muestra (sliders, opciones, botones) para ver si responde. **No envía formularios ni sigue enlaces**.
 - **¿Cuál es el botón principal?** Elige el botón relleno más grande de la primera pantalla e indica en el informe cuál eligió. Si eligió el equivocado, marca el correcto en el HTML con el atributo `data-cta` (`<a data-cta href="...">`), o, en un sitio que no puedes editar, ejecuta el comando con `--cta "selector-css"`.

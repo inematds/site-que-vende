@@ -1,0 +1,8 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>amostra.js: configuração errada</title>
+<!-- caso (3ª revisão): moeda "R$", JSON null, faixa sem rotulo e resultado sem titulo deixavam a caixa vazia ou "undefined"; cada um tem de mostrar o erro na caixa -->
+<script src="../../skill/site-que-vende/amostras/amostra.js" defer></script></head><body>
+<amostra-calculadora id="moeda"><script type="application/json">{"moeda":"R$","campos":[{"rotulo":"Horas","tipo":"faixa","min":1,"max":5}]}</script></amostra-calculadora>
+<amostra-calculadora id="nulo"><script type="application/json">null</script></amostra-calculadora>
+<amostra-calculadora id="semrotulo"><script type="application/json">{"campos":[{"tipo":"faixa","min":1,"max":5}]}</script></amostra-calculadora>
+<amostra-quiz id="semtitulo"><script type="application/json">{"perguntas":[{"texto":"A?","opcoes":[{"rotulo":"x","pontos":{"a":1}}]}],"resultados":{"a":{"texto":"sem título"}}}</script></amostra-quiz>
+</body></html>

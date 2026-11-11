@@ -444,7 +444,8 @@ cd skill/site-que-vende/scripts && npm install && npx playwright install chromiu
 <pre>node skill/site-que-vende/scripts/auditar.js minha-pagina/index.html --saida auditoria</pre>
     <h4 id="antes-de-rodar" style="font-family:Sora;font-size:.95rem;margin:1.2em 0 .4em">O que saber antes de rodar</h4>
     <ul class="mut" style="margin:0;padding-left:1.2em">
-      <li>Cada auditoria leva de 20 a 60 segundos e grava de 1 a 12 MB em <code>auditoria/</code> (fotos e relatório). Ponha <code>auditoria/</code> no <code>.gitignore</code> do site.</li>
+      <li>Cada auditoria leva de 20 a 60 segundos e grava de 1 a 20 MB em <code>auditoria/</code> (fotos e relatório). Ponha <code>auditoria/</code> no <code>.gitignore</code> do site.</li>
+      <li>A página é aberta 4 vezes (computador e celular, com e sem &quot;reduzir movimento&quot;): o que ela envia sozinha ao abrir, como analytics, sai 4 vezes. Ao mexer na amostra, o auditor barra todo pedido de rede (envio, GET com dados, pixel, WebSocket), menos arquivos estáticos do próprio site. A lista de títulos genéricos é fixa e erra nos dois sentidos: confira o título você mesmo.</li>
       <li>Enquanto testa a amostra, o auditor barra todo envio da página (formulário, <code>fetch</code>, qualquer pedido que não seja GET) e toda saída para outro endereço. Nada é enviado ao site, e o relatório lista o que foi barrado.</li>
       <li>O auditor rola a página e mexe nos controles da amostra (sliders, opções, botões) para ver se ela responde. Ele não envia formulário e não segue link.</li>
       <li>Qual é o botão principal? Ele escolhe o maior botão cheio da primeira tela e diz no relatório qual escolheu. Se escolheu errado, marque o certo no HTML com o atributo <code>data-cta</code> (<code>&lt;a data-cta href="..."&gt;</code>). Em site que você não pode editar, rode com <code>--cta "seletor-css"</code>.</li>

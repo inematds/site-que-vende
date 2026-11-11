@@ -56,6 +56,18 @@ $A exemplos/ruim/index.html --cta ".nao-existe" --saida "$T/ctax" > "$T/ctax.txt
 $A exemplos/ruim/index.html --cta "a.botao.mais" --saida "$T/cta" > "$T/cta.txt" 2>&1
 tem "$T/cta.txt" 'O botão diz "Saiba mais"' "--cta escolhe o botão indicado"
 $A --help | grep -q -- "--cta" && ok "--help" || ruim "--help"
+# 3ª revisão independente (1.2.1)
+rc=$(caso get-e-websocket)
+node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1]));const b=r.telas.desktop.bloqueados||[];process.exit(b.some(x=>x.startsWith("GET /api/click-get"))&&b.some(x=>x.startsWith("WebSocket"))&&b.some(x=>x.startsWith("GET /pixel"))?0:1)' "$T/get-e-websocket/relatorio.json" && ok "GET com dados, pixel e WebSocket: barrados e listados" || ruim "GET/pixel/WebSocket passaram na sondagem"
+rc=$(caso cta-contorno)
+node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1]));const e=r.telas.desktop.espelho;process.exit(e.cta==="Ver horários livres"&&e.ctaPor==="data-cta"?0:1)' "$T/cta-contorno/relatorio.json" && ok "data-cta em botão de contorno: usado como principal" || ruim "data-cta em botão de contorno ignorado"
+rc=$(caso quiz-outra-vez); grep -q "perguntas em sequência" "$T/quiz-outra-vez.txt" && ruim "quiz com refazer próprio: contou perguntas demais" || ok "quiz com refazer próprio: não conta o recomeço como pergunta"
+grep -q "PASSA  5" "$T/quiz-outra-vez.txt" && ok "quiz com refazer próprio: padrão 5 passa" || ruim "quiz com refazer próprio: padrão 5 não passou"
+rc=$(caso titulo-concreto); grep -q "Título genérico" "$T/titulo-concreto.txt" && ruim "título concreto (de pontas, desbloqueie): deu genérico" || ok "título concreto não é acusado de genérico"
+rc=$(caso titulo-generico); tem "$T/titulo-generico.txt" "Título genérico" "\"A melhor solução para o seu negócio\": genérico"
+$A tests/casos/pasta-alvo --saida "$T/pasta" > "$T/pasta.txt" 2>&1; rc=$?
+[ $rc -ne 2 ] && ! grep -q "404" "$T/pasta.txt" && ok "alvo pasta e arquivo com % no nome: abre, sem 404 (sai $rc)" || { ruim "alvo pasta / % no nome: saiu $rc"; cat "$T/pasta.txt"; }
+node tests/amostra-erros.js || falhas=$((falhas+1))
 
 echo "5) uso errado"
 $A > /dev/null 2>&1; [ $? -eq 2 ] && ok "sem argumento sai 2" || ruim "sem argumento deveria sair 2"

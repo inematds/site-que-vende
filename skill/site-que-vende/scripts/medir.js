@@ -75,14 +75,17 @@
     const out = [];
     for (const el of document.querySelectorAll('a,button,input[type=submit],input[type=button],[role=button]')) {
       if (!visivel(el)) continue;
-      const cs = getComputedStyle(el), r = el.getBoundingClientRect(), f = fundoProprio(cs);
-      if (!f || r.height < 26 || r.height > 110 || r.width < 56 || r.width > 720) continue;
-      const atras = fundoAtras(el), d = dist(f, atras); if (d < 30) continue;
+      // a marca (data-cta / --cta) é lida ANTES dos filtros: botão de contorno ou link de texto marcado vale assim mesmo
+      const marcado = el.hasAttribute('data-cta') || !!(window.__sqvCta && el.matches(window.__sqvCta));
+      const cs = getComputedStyle(el), r = el.getBoundingClientRect(); let f = fundoProprio(cs);
+      if (!f && marcado) f = cor(cs.borderTopColor) && cor(cs.borderTopColor).a >= .5 && parseFloat(cs.borderTopWidth) > 0 ? cor(cs.borderTopColor) : cor(cs.color);
+      if (!marcado && (!f || r.height < 26 || r.height > 110 || r.width < 56 || r.width > 720)) continue;
+      const atras = fundoAtras(el), d = dist(f, atras); if (d < 30 && !marcado) continue;
       const rot = { top: r.top + scrollY, left: r.left, w: r.width, h: r.height };
       const flutua = getComputedStyle(el).position === 'fixed' || !!el.closest('[style*="position: fixed"],[style*="position:fixed"]');
       const txt = rotulo(el);
       // botão flutuante sem texto (ícone de WhatsApp, chat) pesa pouco: quase nunca é a ação principal da página
-      out.push({ el, cor: f, atras, d, r: rot, texto: txt, sel: seletor(el), marcado: el.hasAttribute('data-cta') || (window.__sqvCta && el.matches(window.__sqvCta)),
+      out.push({ el, cor: f, atras, d, r: rot, texto: txt, sel: seletor(el), marcado,
         peso: Math.min(r.width, 360) * r.height * (d / 255) * (saturada(f) ? 1.6 : 1) * (!txt ? .15 : 1) * (flutua ? .5 : 1)
           * (pertoDoTitulo(r) ? 2 : 1) * (el.closest('form') && (el.type === 'submit' || el.tagName === 'INPUT') ? .5 : 1) });
     }
@@ -284,7 +287,7 @@
         }
         for (const el of c.querySelectorAll('select')) { if (el.options.length > 1) { el.selectedIndex = Math.min(el.options.length - 1, 1 + (i % 2)); el.dispatchEvent(new Event('change', { bubbles: true })); el.dispatchEvent(new Event('input', { bubbles: true })); } }
         const r = [...c.querySelectorAll('input[type=radio],input[type=checkbox]')].find(e => visivel(e) || visivel(e.parentElement)); if (r && !r.checked) r.click();
-        const b = [...c.querySelectorAll('button,[role=button],[role=radio]')].find(e => visivel(e) && !e.disabled && e.type !== 'reset' && !(e.tagName === 'A' && !(e.getAttribute('href') || '#').startsWith('#')) && !/voltar|refazer|de novo|back|again|start over|volver|otra vez|de nuevo/i.test(texto(e)));
+        const b = [...c.querySelectorAll('button,[role=button],[role=radio]')].find(e => visivel(e) && !e.disabled && e.type !== 'reset' && !(e.tagName === 'A' && !(e.getAttribute('href') || '#').startsWith('#')) && !e.hasAttribute('data-recomecar') && !/voltar|refazer|de novo|outra vez|novamente|recome[çc]|reiniciar|repetir|back|again|start over|restart|reset|retry|volver|otra vez|de nuevo/i.test(texto(e)));
         if (b) b.click();
         await new Promise(res => setTimeout(res, 260));
         const depois = texto(c), ctrl2 = controles(c);

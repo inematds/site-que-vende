@@ -56,7 +56,8 @@ Código de saída: `0` passou nos cinco, `1` algum falhou, `2` erro de uso ou a 
 
 O que saber antes de rodar:
 
-- Cada auditoria leva de 20 a 60 segundos e grava de 1 a 12 MB em `auditoria/` (fotos e relatório). Ponha `auditoria/` no `.gitignore` do site.
+- Cada auditoria leva de 20 a 60 segundos e grava de 1 a 20 MB em `auditoria/` (fotos e relatório). Ponha `auditoria/` no `.gitignore` do site.
+- A página é aberta 4 vezes (computador e celular, com e sem "reduzir movimento"): o que ela envia sozinha ao abrir, como analytics, sai 4 vezes. Ao mexer na amostra, o auditor barra todo pedido de rede (envio, GET com dados, pixel, WebSocket), menos arquivos estáticos do próprio site. A lista de títulos genéricos é fixa e erra nos dois sentidos: confira o título você mesmo.
 - Enquanto testa a amostra, o auditor barra todo envio da página (formulário, `fetch`, qualquer pedido que não seja GET) e toda saída para outro endereço. Nada é enviado ao site, e o relatório lista o que foi barrado.
 - O auditor rola a página e **mexe nos controles** da amostra (sliders, opções, botões) para ver se ela responde. Ele **não envia formulário e não segue link**.
 - **Qual é o botão principal?** Ele escolhe o maior botão cheio da primeira tela e diz qual escolheu no relatório. Se escolheu errado, marque o certo no HTML com o atributo `data-cta` (`<a data-cta href="...">`), ou, em site que você não pode editar, rode com `--cta "seletor-css"`.

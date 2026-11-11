@@ -38,8 +38,10 @@ Uso:  node auditar.js <url | arquivo.html> [opções]
 
 Código de saída: 0 = os 5 passam · 1 = algum falha · 2 = erro de uso ou a página não abriu.
 O auditor abre a página no computador (1440x900) e no celular (390x844), rola, mexe nos controles da amostra
-(sliders, opções, botões). Durante esse teste ele barra todo envio (formulário, fetch, qualquer pedido que não seja GET) e
-toda saída da página: nada é enviado ao site. Cada auditoria leva de 20 a 60 s.`;
+(sliders, opções, botões). Durante esse teste ele barra todo pedido de rede (formulário, fetch, XHR, beacon, pixel, GET com
+dados, WebSocket) e toda saída da página; só deixa passar arquivos estáticos do próprio site (CSS, JS, imagem, fonte).
+A página é aberta 4 vezes (computador e celular, com e sem "reduzir movimento"): o que ela envia SOZINHA ao abrir
+(analytics, por exemplo) sai 4 vezes, como numa visita comum. Cada auditoria leva de 20 a 60 s.`;
 
 const args = process.argv.slice(2);
 if (args.includes('--help') || args.includes('-h')) { console.log(AJUDA); process.exit(0); }
@@ -49,6 +51,8 @@ const soJson = args.includes('--json');
 if (!alvo) { console.error('uso: node auditar.js <url | arquivo.html> [--saida pasta] [--cta seletor] [--raiz pasta] [--json]   (--help explica)'); process.exit(2); }
 const ehUrl = /^https?:\/\//i.test(alvo);
 if (!ehUrl && !fs.existsSync(alvo)) { console.error('arquivo não encontrado: ' + alvo); process.exit(2); }
+let arq = alvo; // pasta no lugar do arquivo: usa pasta/index.html (servida com a barra final, para os caminhos relativos funcionarem)
+if (!ehUrl && fs.statSync(alvo).isDirectory()) { arq = path.join(alvo, 'index.html'); if (!fs.existsSync(arq)) { console.error('a pasta ' + alvo + ' não tem index.html: passe o arquivo .html da página.'); process.exit(2); } }
 const saida = path.resolve(opt('saida') || 'auditoria');
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.jpg': 'image/jpeg',
@@ -56,17 +60,17 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': '
   '.woff2': 'font/woff2', '.json': 'application/json', '.ico': 'image/x-icon', '.gif': 'image/gif' };
 
 function servir() { // arquivo local: serve a partir da raiz do repositório (a página pode usar ../), senão da pasta dela
-  let raiz = path.dirname(path.resolve(alvo));
+  let raiz = path.dirname(path.resolve(arq));
   for (let d = raiz; d !== path.dirname(d); d = path.dirname(d)) if (fs.existsSync(path.join(d, '.git'))) { raiz = d; break; }
   if (opt('raiz')) raiz = path.resolve(opt('raiz'));
   const srv = http.createServer((req, res) => {
-    let f = path.join(raiz, decodeURIComponent(req.url.split('?')[0]));
+    let f; try { f = path.join(raiz, decodeURIComponent(req.url.split('?')[0])); } catch (_) { res.writeHead(400); return res.end(); } // "50% off.jpg" sem codificar
     if ((f === raiz || f.startsWith(raiz + path.sep)) && fs.existsSync(f) && fs.statSync(f).isDirectory()) f = path.join(f, 'index.html');
     if (!(f === raiz || f.startsWith(raiz + path.sep)) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
     res.writeHead(200, { 'Content-Type': MIME[path.extname(f).toLowerCase()] || 'application/octet-stream' });
     fs.createReadStream(f).pipe(res);
   });
-  return new Promise(ok => srv.listen(0, '127.0.0.1', () => ok({ srv, url: 'http://127.0.0.1:' + srv.address().port + '/' + path.relative(raiz, path.resolve(alvo)).split(path.sep).join('/') })));
+  return new Promise(ok => srv.listen(0, '127.0.0.1', () => ok({ srv, url: 'http://127.0.0.1:' + srv.address().port + '/' + path.relative(raiz, path.resolve(arq)).split(path.sep).join('/') })));
 }
 
 const TELAS = [{ nome: 'desktop', width: 1440, height: 900 }, { nome: 'celular', width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }];
@@ -78,8 +82,10 @@ const naoCarregou = new Set();
 // frases que servem para qualquer empresa = não servem para ninguém
 const GENERICO = [/bem[- ]vind/i, /welcome to/i, /bienvenid/i, /solu[çc][õo]es? (inovador|inteligent|completa|digita)/i, /innovative solutions?/i, /soluciones innovadoras/i,
   /pr[óo]xim[ao] n[íi]vel/i, /next[- ]level/i, /next[- ]gen/i, /o futuro d/i, /the future of/i, /el futuro de/i, /transforme (o )?seu neg[óo]cio/i, /transform your business/i,
-  /de ponta/i, /cutting[- ]edge/i, /state[- ]of[- ]the[- ]art/i, /revolucion/i, /revolutioniz/i, /powered by ai/i, /com (o poder d[ae] )?(ia|intelig[êe]ncia artificial)\b/i, /ai[- ]powered/i, /impulsad[oa] por ia/i,
-  /excel[êe]ncia/i, /qualidade e (confian|tradi)/i, /sua empresa (mais|no)/i, /unlock|desbloqueie|supercharge|eleve (o|seu)/i, /lorem ipsum/i];
+  /\bde ponta\b(?! [a-z])/i, /tecnologia de ponta/i, /cutting[- ]edge/i, /state[- ]of[- ]the[- ]art/i, /revolucion/i, /revolutioniz/i, /powered by ai/i, /com (o poder d[ae] )?(ia|intelig[êe]ncia artificial)\b/i, /ai[- ]powered/i, /impulsad[oa] por ia/i,
+  /excel[êe]ncia/i, /qualidade e (confian|tradi)/i, /sua empresa (mais|no)/i, /\bunlock (your|the)\b|\bsupercharge\b|\beleve (o|seu) (neg[óo]cio|n[íi]vel)/i, /lorem ipsum/i,
+  /a melhor (solu[çc][ãa]o|op[çc][ãa]o|escolha) para (o |a )?(seu|sua|voc[êe])/i, /the best solution for/i, /la mejor soluci[óo]n para/i, /solu[çc][õo]es para (o )?seu neg[óo]cio/i];
+// a lista é fixa e erra nos dois sentidos (deixa passar genérico novo, pode pegar frase concreta): o relatório devolve o título para revisão humana
 const BOTAO_VAGO = /^(saiba mais|saber mais|clique aqui|enviar|envie|submit|send|learn more|read more|click here|leia mais|ver mais|veja mais|continuar|ok|começar|comece|get started|start|más información|enviar mensaje|contato|contact|contacto|fale conosco|contact us)[\s!.→›»]*$/i;
 const PRIMEIRA_PESSOA = /^(somos|n[óo]s\b|nossa?s?\b|a nossa|o nosso|h[áa] (mais de )?\d+ anos|desde \d{4}|we are|we're|our\b|since \d{4}|nuestr[oa]s?\b)/i;
 const SEGUNDA_PESSOA = /\b(voc[êe]s?|seus?|suas?|teus?|tuas?|te\b|your?|you'?re|tu\b|tus?\b|usted|su\b|sus\b)/i;
@@ -166,11 +172,15 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
         await page.screenshot({ fullPage: true, path: path.join(saida, 'desktop-marca-texto.png') });
         // sondagem da amostra: nada sai da página. Todo pedido que não seja GET (envio por formulário, fetch, beacon) e toda
         // navegação são barrados (a navegação recebe 204, que mantém a página onde está); janela nova é ignorada. O que foi barrado vai para o relatório.
-        const bloq = [];
-        await page.route('**/*', route => { const q = route.request(); if (q.method() !== 'GET' || q.isNavigationRequest()) { bloq.push(q.method() + ' ' + q.url().replace(/^https?:\/\/127\.0\.0\.1:\d+/, '')); return q.isNavigationRequest() ? route.fulfill({ status: 204, body: '' }) : route.abort(); } return route.continue(); });
+        // 1.2.1 (3ª revisão): GET com dados, pixel e WebSocket também passavam. Agora só passa GET de arquivo estático do próprio site, sem "?".
+        const bloq = [], origem = new URL(page.url()).origin;
+        const estatico = q => { if (q.method() !== 'GET' || q.isNavigationRequest()) return false; const u = new URL(q.url());
+          return u.origin === origem && !u.search && ['stylesheet', 'script', 'image', 'font', 'media'].includes(q.resourceType()); };
+        await page.route('**/*', route => { const q = route.request(); if (estatico(q)) return route.continue(); bloq.push(q.method() + ' ' + q.url().replace(/^https?:\/\/127\.0\.0\.1:\d+/, '')); return q.isNavigationRequest() ? route.fulfill({ status: 204, body: '' }) : route.abort(); });
+        await page.routeWebSocket(/.*/, ws => { bloq.push('WebSocket ' + ws.url().replace(/^wss?:\/\/127\.0\.0\.1:\d+/, '')); ws.close(); });
         await page.evaluate(() => { window.open = () => null; });
         m.amostra = await page.evaluate(() => window.__sqv.amostra());
-        await espera(300); await page.unroute('**/*'); m.bloqueados = bloq;
+        await espera(300); await page.unrouteAll({ behavior: 'ignoreErrors' }); m.bloqueados = bloq;
       }
       await ctx.close();
       const r = await abrir(browser, url, tela, true); await r.page.waitForLoadState('load', { timeout: 30000 }).catch(() => {}); await espera(1200);
@@ -190,6 +200,7 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
   let p = padrao(1, 'Teste do espelho', 'A primeira tela diz para quem é, o que a pessoa ganha e o que fazer agora.');
   const e = d.espelho; p.medidas = { titulo: e.titulo, subtitulo: e.subtitulo, 'botão principal': e.cta === null ? null : (e.cta || '(sem texto)') + '  [' + e.ctaSel + ', escolhido por: ' + e.ctaPor + ']', 'botão principal no celular': c.espelho.cta === e.cta ? 'o mesmo' : (c.espelho.cta || '(nenhum)') + '  [' + c.espelho.ctaSel + ']', 'botão na 1ª tela (desktop)': e.ctaNaTela1, 'botão na 1ª tela (celular)': c.espelho.ctaNaTela1, 'outros botões cheios na 1ª tela': e.outrosTela1 };
   if (!e.titulo || !e.tituloNaTela1) falha(p, 'Não há título na primeira tela.', 'Ponha um título (h1) na primeira tela com o resultado que o visitante leva.');
+  else if (!c.espelho.tituloNaTela1) falha(p, 'No celular, o título está abaixo da primeira tela.', 'No celular (390 px), encurte ou reduza o que vem antes do título para ele aparecer sem rolar.');
   else {
     const g = GENERICO.find(r => r.test(e.titulo));
     if (g) falha(p, `Título genérico: "${e.titulo}" serve para qualquer empresa (o trecho "${g.exec(e.titulo)[0]}" não diz nada sobre o cliente).`, 'Reescreva o título com o resultado para UMA pessoa: em vez do recurso ("agendamento com IA"), o que ela ganha ("encha sua agenda sem responder mensagem").');
@@ -245,7 +256,9 @@ async function movimentoPorTela(page, limiteTelas = 8) { // rola tela a tela e c
     'máximo de coisas se movendo numa tela': pior.n + (pior.n ? ' (tela ' + pior.tela + ': ' + pior.quem.slice(0, 5).join(', ') + ')' : ''), 'movendo com "reduzir movimento" ligado': redMov };
   const onde = (a, b) => a === false && b === false ? 'no computador e no celular' : a === false ? 'no computador' : 'no celular';
   const tp = d.pronto.titulo === false ? d.pronto : c.pronto;
-  if (d.pronto.titulo === false || c.pronto.titulo === false) falha(p, `O título não está legível 0,4 s depois de a página abrir, ${onde(d.pronto.titulo, c.pronto.titulo)} (${tp.tituloNaTela === false ? 'ele ainda está fora da tela' : 'opacidade ' + tp.opTitulo}): o visitante espera a animação.`, 'Título, texto e botão da primeira tela aparecem prontos, sem fade nem entrada. Animação de entrada só da segunda tela para baixo.');
+  // título simplesmente abaixo da 1ª tela (parado, sem animação) é falha do padrão 1, não espera de animação
+  const abaixo = (t, esp) => t.pronto.titulo === false && t.pronto.tituloNaTela === false && !esp.tituloNaTela1 && t.pronto.opTitulo >= .9;
+  if ((d.pronto.titulo === false && !abaixo(d, e)) || (c.pronto.titulo === false && !abaixo(c, c.espelho))) falha(p, `O título não está legível 0,4 s depois de a página abrir, ${onde(d.pronto.titulo, c.pronto.titulo)} (${tp.tituloNaTela === false ? 'ele ainda está fora da tela' : 'opacidade ' + tp.opTitulo}): o visitante espera a animação.`, 'Título, texto e botão da primeira tela aparecem prontos, sem fade nem entrada. Animação de entrada só da segunda tela para baixo.');
   const bp = d.pronto.botao === false ? d.pronto : c.pronto;
   if (d.pronto.botao === false || c.pronto.botao === false) falha(p, `O botão principal não está visível 0,4 s depois de a página abrir, ${onde(d.pronto.botao, c.pronto.botao)} (${bp.botaoNaTela === false ? 'ele entra na tela depois, por animação ou porque o conteúdo acima ainda está carregando' : 'opacidade ' + bp.opBotao}).`, 'O botão da primeira tela aparece pronto, sem animação de entrada.');
   if (pior.n > 3) falha(p, `${pior.n} coisas se movem ao mesmo tempo na tela ${pior.tela} (${pior.quem.slice(0, 5).join(', ')}).`, 'Escolha UMA coisa para se mover por tela (o produto, o resultado, o antes e depois) e deixe o resto parado.');

@@ -444,7 +444,8 @@ cd skill/site-que-vende/scripts && npm install && npx playwright install chromiu
 <pre>node skill/site-que-vende/scripts/auditar.js minha-pagina/index.html --saida auditoria</pre>
     <h4 id="antes-de-rodar" style="font-family:Sora;font-size:.95rem;margin:1.2em 0 .4em">What to know before running</h4>
     <ul class="mut" style="margin:0;padding-left:1.2em">
-      <li>Each audit takes 20 to 60 seconds and writes 1 to 12 MB to <code>auditoria/</code> (screenshots and report). Add <code>auditoria/</code> to the site's <code>.gitignore</code>.</li>
+      <li>Each audit takes 20 to 60 seconds and writes 1 to 20 MB to <code>auditoria/</code> (screenshots and report). Add <code>auditoria/</code> to the site's <code>.gitignore</code>.</li>
+      <li>The page is opened 4 times (desktop and phone, with and without &quot;reduce motion&quot;): whatever it sends on its own when it loads, such as analytics, goes out 4 times. While it probes the sample, the auditor blocks every network request (submissions, GET with data, pixels, WebSocket) except the site's own static files. The list of generic headlines is fixed and errs both ways: check the headline yourself.</li>
       <li>While testing the sample, the auditor blocks every page submission (form, <code>fetch</code>, any request that isn't GET) and every attempt to reach another address. Nothing is sent to the site, and the report lists what was blocked.</li>
       <li>The auditor scrolls the page and interacts with the sample's controls (sliders, options, buttons) to see if it responds. It does not submit forms or follow links.</li>
       <li>Which is the main button? It picks the largest filled button on the first screen and says in the report which one it picked. If it picked the wrong one, mark the right one in the HTML with the <code>data-cta</code> attribute (<code>&lt;a data-cta href="..."&gt;</code>). On a site you cannot edit, run with <code>--cta "css-selector"</code>.</li>
